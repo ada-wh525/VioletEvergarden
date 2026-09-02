@@ -115,6 +115,42 @@ const works = [
 
 const LetterIcon = () => <span className="letter-icon" aria-hidden="true" />;
 
+const drawTrackedText = (
+  context: CanvasRenderingContext2D,
+  text: string,
+  x: number,
+  y: number,
+  tracking: number,
+) => {
+  let cursor = x;
+  Array.from(text).forEach((character) => {
+    context.fillText(character, cursor, y);
+    cursor += context.measureText(character).width + tracking;
+  });
+};
+
+const wrapCanvasText = (context: CanvasRenderingContext2D, text: string, maxWidth: number) => {
+  const lines: string[] = [];
+  text.split("\n").forEach((paragraph) => {
+    if (!paragraph) {
+      lines.push("");
+      return;
+    }
+    let line = "";
+    Array.from(paragraph).forEach((character) => {
+      const nextLine = `${line}${character}`;
+      if (line && context.measureText(nextLine).width > maxWidth) {
+        lines.push(line);
+        line = character;
+      } else {
+        line = nextLine;
+      }
+    });
+    if (line) lines.push(line);
+  });
+  return lines;
+};
+
 export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isSoundOn, setIsSoundOn] = useState(false);
@@ -128,9 +164,15 @@ export default function Home() {
   const [signature, setSignature] = useState("");
   const [sealed, setSealed] = useState(false);
   const [deliveryState, setDeliveryState] = useState<"idle" | "sending" | "delivered">("idle");
+  const [keepsakeOpen, setKeepsakeOpen] = useState(false);
+  const [keepsakeUrl, setKeepsakeUrl] = useState("");
+  const [keepsakeStatus, setKeepsakeStatus] = useState<"idle" | "generating" | "ready" | "error">("idle");
   const [petalBurst, setPetalBurst] = useState(0);
   const [spoilers, setSpoilers] = useState(false);
   const heroRef = useRef<HTMLElement>(null);
+  const letterSectionRef = useRef<HTMLElement>(null);
+  const letterPreviewRef = useRef<HTMLDivElement>(null);
+  const keepsakeUrlRef = useRef<string | null>(null);
   const audioRef = useRef<AudioContext | null>(null);
   const toneTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const activeTheme = colors[activeColor];
@@ -158,6 +200,7 @@ export default function Home() {
       observer.disconnect();
       window.removeEventListener("scroll", onScroll);
       if (toneTimerRef.current) clearInterval(toneTimerRef.current);
+      if (keepsakeUrlRef.current) URL.revokeObjectURL(keepsakeUrlRef.current);
       void audioRef.current?.close();
     };
   }, []);
@@ -178,10 +221,167 @@ export default function Home() {
       return () => clearTimeout(timer);
     }
     if (deliveryState === "delivered") {
-      const timer = setTimeout(() => setDeliveryState("idle"), 1800);
+      const timer = setTimeout(() => {
+        setDeliveryState("idle");
+        setKeepsakeOpen(true);
+      }, 1800);
       return () => clearTimeout(timer);
     }
   }, [deliveryState]);
+
+  const generateKeepsake = async (text: string, author: string) => {
+    const section = letterSectionRef.current;
+    const preview = letterPreviewRef.current;
+    if (!section || !preview) return;
+
+    setKeepsakeStatus("generating");
+    setKeepsakeUrl("");
+    if (keepsakeUrlRef.current) {
+      URL.revokeObjectURL(keepsakeUrlRef.current);
+      keepsakeUrlRef.current = null;
+    }
+
+    try {
+      await document.fonts.ready;
+      const sectionStyle = getComputedStyle(section);
+      const previewStyle = getComputedStyle(preview);
+      const palette = {
+        background: sectionStyle.getPropertyValue("--letter-section-bg").trim() || "#d8dce2",
+        paper: sectionStyle.getPropertyValue("--letter-paper").trim() || "#f5f2eb",
+        ink: sectionStyle.getPropertyValue("--letter-ink").trim() || "#263e62",
+        accent: sectionStyle.getPropertyValue("--letter-accent").trim() || "#263e62",
+        accentSoft: sectionStyle.getPropertyValue("--letter-accent-soft").trim() || "#91afc2",
+        seal: sectionStyle.getPropertyValue("--letter-seal").trim() || "#263e62",
+      };
+      const fontFamily = previewStyle.fontFamily || '"Cormorant Garamond", "Noto Sans SC", serif';
+      const isItalic = sectionStyle.getPropertyValue("--letter-font-style").trim() === "italic";
+      const canvas = document.createElement("canvas");
+      canvas.width = 1200;
+      canvas.height = 1600;
+      const context = canvas.getContext("2d");
+      if (!context) throw new Error("Canvas is unavailable");
+
+      context.fillStyle = palette.background;
+      context.fillRect(0, 0, canvas.width, canvas.height);
+      context.globalAlpha = 0.08;
+      context.strokeStyle = palette.accent;
+      context.lineWidth = 1;
+      for (let y = 20; y < canvas.height; y += 28) {
+        context.beginPath();
+        context.moveTo(0, y);
+        context.lineTo(canvas.width, y + 38);
+        context.stroke();
+      }
+      context.globalAlpha = 1;
+
+      const paperX = 86;
+      const paperY = 70;
+      const paperWidth = 1028;
+      const paperHeight = 1460;
+      context.shadowColor = "rgba(35, 31, 28, 0.18)";
+      context.shadowBlur = 45;
+      context.shadowOffsetY = 20;
+      context.fillStyle = palette.paper;
+      context.fillRect(paperX, paperY, paperWidth, paperHeight);
+      context.shadowColor = "transparent";
+      context.globalAlpha = 0.26;
+      context.strokeStyle = palette.accent;
+      context.lineWidth = 2;
+      context.strokeRect(paperX + 24, paperY + 24, paperWidth - 48, paperHeight - 48);
+      context.globalAlpha = 1;
+
+      context.save();
+      context.beginPath();
+      context.rect(paperX, paperY, paperWidth, 14);
+      context.clip();
+      for (let x = paperX - 50, index = 0; x < paperX + paperWidth + 50; x += 54, index += 1) {
+        context.fillStyle = index % 2 === 0 ? palette.accent : palette.accentSoft;
+        context.beginPath();
+        context.moveTo(x, paperY);
+        context.lineTo(x + 30, paperY);
+        context.lineTo(x + 18, paperY + 14);
+        context.lineTo(x - 12, paperY + 14);
+        context.closePath();
+        context.fill();
+      }
+      context.restore();
+
+      context.fillStyle = palette.accent;
+      context.font = `600 18px ${fontFamily}`;
+      drawTrackedText(context, "LEIDENSCHAFTLICH · C.H. POSTAL", 176, 178, 4.2);
+      context.textAlign = "right";
+      context.globalAlpha = 0.65;
+      context.font = `500 17px ${fontFamily}`;
+      context.fillText(`${activeTheme.name} · ${activeTheme.en}`, 1024, 178);
+      context.textAlign = "left";
+      context.globalAlpha = 1;
+
+      context.strokeStyle = palette.accent;
+      context.globalAlpha = 0.2;
+      context.beginPath();
+      context.moveTo(176, 222);
+      context.lineTo(1024, 222);
+      context.stroke();
+      context.globalAlpha = 1;
+
+      context.fillStyle = palette.accent;
+      context.font = `italic 500 66px ${fontFamily}`;
+      context.fillText("Dear Violet,", 176, 355);
+
+      context.fillStyle = palette.ink;
+      context.font = `${isItalic ? "italic " : ""}400 34px ${fontFamily}`;
+      const lines = wrapCanvasText(context, text, 848);
+      lines.slice(0, 13).forEach((line, index) => {
+        context.fillText(line, 176, 480 + index * 61);
+      });
+
+      context.textAlign = "right";
+      context.fillStyle = palette.accent;
+      context.font = `italic 500 37px ${fontFamily}`;
+      context.fillText(`— ${author}`, 1018, 1288);
+      context.textAlign = "left";
+
+      const sealX = 600;
+      const sealY = 1390;
+      const sealRadius = 67;
+      const sealGradient = context.createRadialGradient(sealX - 20, sealY - 22, 8, sealX, sealY, sealRadius);
+      sealGradient.addColorStop(0, palette.accentSoft);
+      sealGradient.addColorStop(0.45, palette.seal);
+      sealGradient.addColorStop(1, palette.ink);
+      context.fillStyle = sealGradient;
+      context.beginPath();
+      context.arc(sealX, sealY, sealRadius, 0, Math.PI * 2);
+      context.fill();
+      context.globalAlpha = 0.55;
+      context.strokeStyle = palette.paper;
+      context.lineWidth = 2;
+      context.beginPath();
+      context.arc(sealX, sealY, 50, 0, Math.PI * 2);
+      context.stroke();
+      context.globalAlpha = 1;
+      context.fillStyle = palette.paper;
+      context.textAlign = "center";
+      context.font = `italic 500 55px ${fontFamily}`;
+      context.fillText("V", sealX, sealY + 17);
+
+      context.fillStyle = palette.accent;
+      context.globalAlpha = 0.55;
+      context.font = `500 15px ${fontFamily}`;
+      context.fillText("LETTERS FROM THE HEART  ·  VIOLETEVER.GARDEN", sealX, 1490);
+      context.globalAlpha = 1;
+      context.textAlign = "left";
+
+      const blob = await new Promise<Blob>((resolve, reject) => {
+        canvas.toBlob((result) => result ? resolve(result) : reject(new Error("Image export failed")), "image/png");
+      });
+      const url = URL.createObjectURL(blob);
+      keepsakeUrlRef.current = url;
+      setKeepsakeUrl(url);
+      setKeepsakeStatus("ready");
+    } catch {
+      setKeepsakeStatus("error");
+    }
+  };
 
   const playChime = (context: AudioContext) => {
     const now = context.currentTime;
@@ -219,6 +419,7 @@ export default function Home() {
     setActiveColor(index);
     setSealed(false);
     setDeliveryState("idle");
+    setKeepsakeOpen(false);
     setToast(`${colors[index].name}信笺已启用`);
   };
 
@@ -227,10 +428,13 @@ export default function Home() {
       setToast("请先写下一句话");
       return;
     }
-    const letter = { text: letterText, signature: signature || "一位远方的读者", savedAt: new Date().toISOString() };
+    const author = signature || "一位远方的读者";
+    const letter = { text: letterText, signature: author, theme: activeTheme.className, savedAt: new Date().toISOString() };
     localStorage.setItem("violet-fan-letter", JSON.stringify(letter));
     setSealed(true);
+    setKeepsakeOpen(false);
     setDeliveryState("sending");
+    void generateKeepsake(letterText.trim(), author);
     if (audioRef.current) playChime(audioRef.current);
   };
 
@@ -486,7 +690,7 @@ export default function Home() {
         </div>
       </section>
 
-      <section className={`letter-section theme-${activeTheme.className}`} id="write">
+      <section className={`letter-section theme-${activeTheme.className}`} id="write" ref={letterSectionRef}>
         <div className="letter-flowers" aria-hidden="true"><i /><i /><i /><i /><i /></div>
         <div className="letter-section-heading" data-reveal>
           <p className="section-kicker">ONE LAST LETTER</p>
@@ -506,15 +710,15 @@ export default function Home() {
               maxLength={180}
               placeholder="如果有一句话可以抵达她身边，你会写什么？"
               value={letterText}
-              onChange={(event) => { setLetterText(event.target.value); setSealed(false); setDeliveryState("idle"); }}
+              onChange={(event) => { setLetterText(event.target.value); setSealed(false); setDeliveryState("idle"); setKeepsakeOpen(false); }}
             />
             <div className="letter-form-bottom">
               <label htmlFor="letter-signature">FROM</label>
-              <input id="letter-signature" maxLength={24} placeholder="一位远方的读者" value={signature} onChange={(event) => setSignature(event.target.value)} />
+              <input id="letter-signature" maxLength={24} placeholder="一位远方的读者" value={signature} onChange={(event) => { setSignature(event.target.value); setKeepsakeOpen(false); }} />
               <span>{letterText.length} / 180</span>
             </div>
           </div>
-          <div className="letter-preview">
+          <div className="letter-preview" ref={letterPreviewRef}>
             <div className="airmail-line" />
             <p className="preview-place">LEIDENSCHAFTLICH · CH POSTAL</p>
             <div className="preview-body">
@@ -550,6 +754,36 @@ export default function Home() {
             <strong>{deliveryState === "sending" ? "信件正在启程" : "心意已经送达"}</strong>
             <span>{deliveryState === "sending" ? "DELIVERING YOUR LETTER" : "DELIVERED WITH LOVE"}</span>
           </p>
+        </div>
+      )}
+
+      {keepsakeOpen && (
+        <div className="keepsake-overlay" role="dialog" aria-modal="true" aria-labelledby="keepsake-title">
+          <div className="keepsake-card">
+            <button className="keepsake-close" type="button" aria-label="关闭纪念信笺" onClick={() => setKeepsakeOpen(false)}>×</button>
+            <div className="keepsake-copy">
+              <p className="section-kicker light">DELIVERED WITH LOVE</p>
+              <h2 id="keepsake-title">把抵达的心意，<br /><em>留成一页纪念。</em></h2>
+              <p>你选择的信笺主题、文字与署名，已经被装订进这张纪念图。</p>
+              <div className="keepsake-actions">
+                {keepsakeStatus === "ready" && keepsakeUrl ? (
+                  <a href={keepsakeUrl} download={`letter-to-violet-${activeTheme.className}.png`}><span>↓</span> 下载纪念信笺</a>
+                ) : (
+                  <button type="button" disabled>{keepsakeStatus === "error" ? "生成遇到问题" : "正在生成信笺…"}</button>
+                )}
+                <button type="button" onClick={() => setKeepsakeOpen(false)}>继续阅读</button>
+              </div>
+            </div>
+            <div className="keepsake-preview" aria-live="polite">
+              {keepsakeStatus === "ready" && keepsakeUrl ? (
+                // Blob URLs are generated in-browser and cannot use Next image optimization.
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={keepsakeUrl} alt="根据所选主题生成的纪念信笺预览" />
+              ) : (
+                <div className="keepsake-loading"><i /><span>{keepsakeStatus === "error" ? "信笺暂未生成，请重新寄出一次" : "正在晾干墨迹"}</span></div>
+              )}
+            </div>
+          </div>
         </div>
       )}
 
