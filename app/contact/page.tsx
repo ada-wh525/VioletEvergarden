@@ -1,6 +1,7 @@
 "use client";
 
 import { type FormEvent, useState } from "react";
+import Link from "next/link";
 
 type SubmitState = "idle" | "sending" | "success" | "error";
 
@@ -37,16 +38,16 @@ export default function ContactPage() {
   return (
     <main className="contact-page">
       <header className="contact-nav">
-        <a className="brand" href="/" aria-label="返回薇尔莉特纪念站">
+        <Link className="brand" href="/" aria-label="返回薇尔莉特纪念站">
           <span className="brand-mark">V</span>
           <span className="brand-name">LETTERS<br />FROM THE HEART</span>
-        </a>
-        <a className="contact-back" href="/">← 返回花园</a>
+        </Link>
+        <Link className="contact-back" href="/">← 返回花园</Link>
       </header>
 
       <section className="contact-stage">
         <div className="contact-copy">
-          <p className="section-kicker">THE HIDDEN CORNER · 01</p>
+          <p className="section-kicker">THE HIDDEN CORNER</p>
           <h1>写给作者的，<br /><em>一封短笺。</em></h1>
           <p className="contact-intro">如果你发现了页面里的小问题，或只是想聊聊薇尔莉特与那些没有寄出的信，都可以从这里找到我。</p>
           <div className="direct-mail">
@@ -91,7 +92,7 @@ export default function ContactPage() {
             <p className={`contact-feedback ${submitState}`} role="status" aria-live="polite">{feedback}</p>
             <small>邮件由 Web3Forms 转交至作者邮箱。</small>
           </form>
-          <div className="contact-postmark" aria-hidden="true"><b>V</b><span>SEP · 2026<br />LEIDEN</span></div>
+          <div className="contact-postmark" aria-hidden="true"><b>V</b><span>VIOLET<br />FAN MAIL</span></div>
         </div>
       </section>
 

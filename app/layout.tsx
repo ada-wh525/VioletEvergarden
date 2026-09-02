@@ -42,6 +42,9 @@ export async function generateMetadata(): Promise<Metadata> {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="zh-CN">
+      <head>
+        <link rel="preload" as="image" href="/violet-hero-clean.webp" fetchPriority="high" />
+      </head>
       <body className={`${serif.variable} ${sans.variable}`}>{children}</body>
     </html>
   );

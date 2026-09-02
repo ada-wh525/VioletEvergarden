@@ -155,7 +155,7 @@ export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [isSoundOn, setIsSoundOn] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [progress, setProgress] = useState(0);
+  const [activeSection, setActiveSection] = useState("");
   const [activeJourney, setActiveJourney] = useState(0);
   const [quoteIndex, setQuoteIndex] = useState(0);
   const [activeColor, setActiveColor] = useState(0);
@@ -169,9 +169,13 @@ export default function Home() {
   const [keepsakeStatus, setKeepsakeStatus] = useState<"idle" | "generating" | "ready" | "error">("idle");
   const [petalBurst, setPetalBurst] = useState(0);
   const [spoilers, setSpoilers] = useState(false);
-  const heroRef = useRef<HTMLElement>(null);
+  const topSentinelRef = useRef<HTMLDivElement>(null);
   const letterSectionRef = useRef<HTMLElement>(null);
   const letterPreviewRef = useRef<HTMLDivElement>(null);
+  const journeyTabRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const keepsakeDialogRef = useRef<HTMLDivElement>(null);
+  const keepsakeCloseRef = useRef<HTMLButtonElement>(null);
+  const focusReturnRef = useRef<HTMLElement | null>(null);
   const keepsakeUrlRef = useRef<string | null>(null);
   const audioRef = useRef<AudioContext | null>(null);
   const toneTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -179,26 +183,30 @@ export default function Home() {
 
   useEffect(() => {
     document.body.classList.add("motion-ready");
-    const onScroll = () => {
-      const y = window.scrollY;
-      const max = document.documentElement.scrollHeight - window.innerHeight;
-      setScrolled(y > 28);
-      setProgress(max > 0 ? (y / max) * 100 : 0);
-      heroRef.current?.style.setProperty("--scroll-y", `${Math.min(y * 0.11, 80)}px`);
-    };
-
-    const observer = new IntersectionObserver(
+    const revealObserver = new IntersectionObserver(
       (entries) => entries.forEach((entry) => {
         if (entry.isIntersecting) entry.target.classList.add("is-visible");
       }),
       { threshold: 0.14 },
     );
-    document.querySelectorAll("[data-reveal]").forEach((node) => observer.observe(node));
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
+    document.querySelectorAll("[data-reveal]").forEach((node) => revealObserver.observe(node));
+
+    const topObserver = new IntersectionObserver(([entry]) => setScrolled(!entry.isIntersecting));
+    if (topSentinelRef.current) topObserver.observe(topSentinelRef.current);
+
+    const sectionObserver = new IntersectionObserver(
+      (entries) => entries.forEach((entry) => {
+        if (entry.isIntersecting) setActiveSection(entry.target.id);
+      }),
+      { rootMargin: "-28% 0px -58% 0px" },
+    );
+    document.querySelectorAll("#story, #profile, #journey, #support").forEach((node) => sectionObserver.observe(node));
+
     return () => {
-      observer.disconnect();
-      window.removeEventListener("scroll", onScroll);
+      revealObserver.disconnect();
+      topObserver.disconnect();
+      sectionObserver.disconnect();
+      document.body.classList.remove("motion-ready");
       if (toneTimerRef.current) clearInterval(toneTimerRef.current);
       if (keepsakeUrlRef.current) URL.revokeObjectURL(keepsakeUrlRef.current);
       void audioRef.current?.close();
@@ -210,6 +218,40 @@ export default function Home() {
     const timer = setTimeout(() => setToast(""), 2300);
     return () => clearTimeout(timer);
   }, [toast]);
+
+  useEffect(() => {
+    if (!keepsakeOpen) return;
+    const dialog = keepsakeDialogRef.current;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    keepsakeCloseRef.current?.focus();
+
+    const onKeyDown = (event: globalThis.KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setKeepsakeOpen(false);
+        return;
+      }
+      if (event.key !== "Tab" || !dialog) return;
+      const focusable = Array.from(dialog.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'));
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = previousOverflow;
+      focusReturnRef.current?.focus();
+    };
+  }, [keepsakeOpen]);
 
   useEffect(() => {
     if (deliveryState === "sending") {
@@ -338,7 +380,7 @@ export default function Home() {
       context.textAlign = "right";
       context.fillStyle = palette.accent;
       context.font = `italic 500 37px ${fontFamily}`;
-      context.fillText(`— ${author}`, 1018, 1288);
+      context.fillText(author, 1018, 1288);
       context.textAlign = "left";
 
       const sealX = 600;
@@ -429,6 +471,7 @@ export default function Home() {
       return;
     }
     const author = signature || "一位远方的读者";
+    focusReturnRef.current = document.activeElement as HTMLElement;
     const letter = { text: letterText, signature: author, theme: activeTheme.className, savedAt: new Date().toISOString() };
     localStorage.setItem("violet-fan-letter", JSON.stringify(letter));
     setSealed(true);
@@ -440,7 +483,8 @@ export default function Home() {
 
   return (
     <main>
-      <div className="reading-progress" style={{ transform: `scaleX(${progress / 100})` }} />
+      <div className="top-sentinel" ref={topSentinelRef} aria-hidden="true" />
+      <div className="reading-progress" aria-hidden="true" />
       <nav className={`site-nav ${scrolled ? "is-scrolled" : ""}`} aria-label="主导航">
         <a className="brand" href="#top" aria-label="薇尔莉特纪念站首页">
           <span className="brand-mark">V</span>
@@ -457,10 +501,10 @@ export default function Home() {
           <span />
         </button>
         <div className={`nav-links ${menuOpen ? "is-open" : ""}`}>
-          <a href="#story" onClick={() => setMenuOpen(false)}>她的故事</a>
-          <a href="#profile" onClick={() => setMenuOpen(false)}>人物档案</a>
-          <a href="#journey" onClick={() => setMenuOpen(false)}>书信旅程</a>
-          <a href="#support" onClick={() => setMenuOpen(false)}>应援手册</a>
+          <a className={activeSection === "story" ? "active" : ""} aria-current={activeSection === "story" ? "location" : undefined} href="#story" onClick={() => setMenuOpen(false)}>她的故事</a>
+          <a className={activeSection === "profile" ? "active" : ""} aria-current={activeSection === "profile" ? "location" : undefined} href="#profile" onClick={() => setMenuOpen(false)}>人物档案</a>
+          <a className={activeSection === "journey" ? "active" : ""} aria-current={activeSection === "journey" ? "location" : undefined} href="#journey" onClick={() => setMenuOpen(false)}>书信旅程</a>
+          <a className={activeSection === "support" ? "active" : ""} aria-current={activeSection === "support" ? "location" : undefined} href="#support" onClick={() => setMenuOpen(false)}>应援手册</a>
         </div>
         <button
           className="sound-toggle"
@@ -474,7 +518,7 @@ export default function Home() {
         </button>
       </nav>
 
-      <section className="hero" id="top" ref={heroRef}>
+      <section className="hero" id="top">
         <div className="hero-paper" aria-hidden="true" />
         <div className="hero-copy">
           <div className="eyebrow"><span>致 未曾谋面的你</span><i /></div>
@@ -482,10 +526,9 @@ export default function Home() {
             <span className="script-word">Violet</span>
             <span className="serif-word">Evergarden</span>
           </h1>
-          <p className="hero-kicker">写给世界的，第十四封信。</p>
           <p className="hero-intro">
-            她穿越战火与思念，替人们寻找最难说出口的那句话。<br />
-            这一次，请让我们把爱意写给她。
+            <strong>写给世界的，第十四封信。</strong>
+            <span>她穿越战火与思念，替人们寻找最难说出口的那句话。这一次，请让我们把爱意写给她。</span>
           </p>
           <div className="hero-actions">
             <a className="primary-cta" href="#story"><LetterIcon />开启这封信</a>
@@ -493,20 +536,16 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="hero-visual" aria-label="薇尔莉特原创角色插画">
+        <div className="hero-visual" role="img" aria-label="薇尔莉特原创角色插画">
           <div className="hero-shade" />
           <div className="floating-caption">
-            <span>01</span>
             <p>AUTO MEMORIES DOLL<br /><b>莱顿沙夫特里希 · C.H. 邮政公司</b></p>
           </div>
           <button className="wax-seal hero-seal" type="button" aria-label="撒下紫罗兰花瓣" onClick={() => setPetalBurst((value) => value + 1)}><span>V</span></button>
         </div>
-        <div className="scroll-note" aria-hidden="true"><span>SCROLL TO READ</span><i /></div>
-        <div className="hero-index" aria-hidden="true">VOL. 01</div>
       </section>
 
       <section className="story-section section-shell" id="story">
-        <div className="section-number" aria-hidden="true">01</div>
         <div className="section-heading" data-reveal>
           <p className="section-kicker">THE STORY OF A LETTER</p>
           <h2>她把无法说出口的爱，<br /><em>写成了可以抵达的信。</em></h2>
@@ -516,7 +555,6 @@ export default function Home() {
             <div className="story-image" role="img" aria-label="列车窗边的薇尔莉特原创插画" />
             <div className="photo-corner top-left" />
             <div className="photo-corner bottom-right" />
-            <p className="vertical-note">THE LETTER CONNECTS TWO HEARTS</p>
           </div>
           <div className="story-copy" data-reveal>
             <p className="dropcap">曾经，她只理解命令与胜负。战争带走了双臂，也留下了一句无法理解的“爱してる”。为了寻找它的意义，薇尔莉特成为替人书写心意的自动手记人偶。</p>
@@ -544,7 +582,6 @@ export default function Home() {
         <div className="profile-backdrop" aria-hidden="true">V</div>
         <div className="section-shell profile-shell">
           <div className="profile-intro" data-reveal>
-            <p className="section-kicker light">PERSONNEL FILE · NO. 001</p>
             <h2>Violet<br /><em>Evergarden</em></h2>
             <p className="profile-jp">ヴァイオレット・エヴァーガーデン</p>
             <div className="profile-symbols">
@@ -565,16 +602,13 @@ export default function Home() {
                 </div>
               ))}
             </div>
-            <p className="profile-note">* 作品未公布薇尔莉特的准确生日；年龄依据故事初期台词与时间线推定。</p>
           </div>
         </div>
       </section>
 
       <section className="journey-section section-shell" id="journey">
-        <div className="section-number" aria-hidden="true">02</div>
         <div className="journey-heading" data-reveal>
           <div>
-            <p className="section-kicker">A JOURNEY IN FIVE LETTERS</p>
             <h2>从“爱是什么”，<br /><em>到终于懂得爱。</em></h2>
           </div>
           <p>轻触章节，翻阅她从战场走向人群的旅程。内容保持温和剧透，终章细节默认隐藏。</p>
@@ -586,9 +620,25 @@ export default function Home() {
               key={journey.chapter}
               type="button"
               role="tab"
+              id={`journey-tab-${index}`}
+              aria-controls={`journey-panel-${index}`}
               aria-selected={activeJourney === index}
+              tabIndex={activeJourney === index ? 0 : -1}
               className={activeJourney === index ? "active" : ""}
               onClick={() => setActiveJourney(index)}
+              onKeyDown={(event) => {
+                const lastIndex = journeys.length - 1;
+                const nextIndex = event.key === "ArrowRight" ? (index + 1) % journeys.length
+                  : event.key === "ArrowLeft" ? (index - 1 + journeys.length) % journeys.length
+                    : event.key === "Home" ? 0
+                      : event.key === "End" ? lastIndex
+                        : index;
+                if (nextIndex === index && !["Home", "End"].includes(event.key)) return;
+                event.preventDefault();
+                setActiveJourney(nextIndex);
+                journeyTabRefs.current[nextIndex]?.focus();
+              }}
+              ref={(node) => { journeyTabRefs.current[index] = node; }}
             >
               <span>{String(index + 1).padStart(2, "0")}</span>
               <b>{journey.label}</b>
@@ -601,7 +651,7 @@ export default function Home() {
             <span>{String(activeJourney + 1).padStart(2, "0")}</span>
             <i>{journeys[activeJourney].motif}</i>
           </div>
-          <div className="journey-copy" key={activeJourney}>
+          <div className="journey-copy" key={activeJourney} role="tabpanel" id={`journey-panel-${activeJourney}`} aria-labelledby={`journey-tab-${activeJourney}`} tabIndex={0}>
             <p>{journeys[activeJourney].chapter}</p>
             <h3>{journeys[activeJourney].title}</h3>
             <div className={activeJourney === 4 && !spoilers ? "spoiler-copy is-covered" : "spoiler-copy"}>
@@ -623,7 +673,7 @@ export default function Home() {
           <div className="quote-counter">0{quoteIndex + 1} / 0{quotes.length}</div>
           <blockquote key={quoteIndex}>
             <p>{quotes[quoteIndex].text}</p>
-            <cite>— {quotes[quoteIndex].source}</cite>
+            <cite>{quotes[quoteIndex].source}</cite>
           </blockquote>
           <div className="quote-controls">
             <button type="button" aria-label="上一句" onClick={() => setQuoteIndex((quoteIndex - 1 + quotes.length) % quotes.length)}>←</button>
@@ -635,7 +685,6 @@ export default function Home() {
 
       <section className="watch-section section-shell">
         <div className="watch-heading" data-reveal>
-          <p className="section-kicker">WATCHING ORDER</p>
           <h2>把故事，<em>按寄达顺序打开。</em></h2>
         </div>
         <div className="work-list">
@@ -655,7 +704,6 @@ export default function Home() {
         <div className="section-shell">
           <div className="support-heading" data-reveal>
             <div>
-              <p className="section-kicker light">FAN SUPPORT MANUAL</p>
               <h2>把喜欢变成一束<br /><em>有分寸的光。</em></h2>
             </div>
           </div>
@@ -724,7 +772,7 @@ export default function Home() {
             <div className="preview-body">
               <p className="preview-dear">Dear Violet,</p>
               <p className={letterText ? "" : "is-placeholder"}>{letterText || "你写下的心意，会在这里成为一封信。"}</p>
-              <p className="preview-sign">— {signature || "一位远方的读者"}</p>
+              <p className="preview-sign">{signature || "一位远方的读者"}</p>
             </div>
             <button className="wax-seal letter-seal" type="button" aria-label="用火漆封缄并寄出信件" onClick={sealLetter} disabled={deliveryState === "sending"}><span>V</span></button>
             <p className="seal-hint">{sealed ? "SENT WITH LOVE" : "轻触火漆，寄出这封信"}</p>
@@ -758,13 +806,12 @@ export default function Home() {
       )}
 
       {keepsakeOpen && (
-        <div className="keepsake-overlay" role="dialog" aria-modal="true" aria-labelledby="keepsake-title">
+        <div className="keepsake-overlay" role="dialog" aria-modal="true" aria-labelledby="keepsake-title" aria-describedby="keepsake-description" ref={keepsakeDialogRef}>
           <div className="keepsake-card">
-            <button className="keepsake-close" type="button" aria-label="关闭纪念信笺" onClick={() => setKeepsakeOpen(false)}>×</button>
+            <button className="keepsake-close" ref={keepsakeCloseRef} type="button" aria-label="关闭纪念信笺" onClick={() => setKeepsakeOpen(false)}>×</button>
             <div className="keepsake-copy">
-              <p className="section-kicker light">DELIVERED WITH LOVE</p>
               <h2 id="keepsake-title">把抵达的心意，<br /><em>留成一页纪念。</em></h2>
-              <p>你选择的信笺主题、文字与署名，已经被装订进这张纪念图。</p>
+              <p id="keepsake-description">你选择的信笺主题、文字与署名，已经被装订进这张纪念图。</p>
               <div className="keepsake-actions">
                 {keepsakeStatus === "ready" && keepsakeUrl ? (
                   <a href={keepsakeUrl} download={`letter-to-violet-${activeTheme.className}.png`}><span>↓</span> 下载纪念信笺</a>
