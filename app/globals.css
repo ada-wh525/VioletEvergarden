@@ -285,7 +285,8 @@ h1 {
 
 /* Watch order */
 .watch-section { padding: 150px 0; }
-.watch-heading { margin-bottom: 80px; }
+.watch-heading { margin-bottom: 64px; }
+.watch-heading h2 { font-size: clamp(40px, 4.2vw, 64px); line-height: 1.12; }
 .work-list { border-top: 1px solid rgb(37 51 71 / 16%); }
 .work-card { display: grid; grid-template-columns: 70px 100px 1.1fr 1fr 40px; align-items: center; gap: 22px; min-height: 150px; border-bottom: 1px solid rgb(37 51 71 / 16%); cursor: pointer; transition: padding .35s ease, background .35s ease; }
 .work-card:hover { padding-inline: 22px; background: rgb(255 255 255 / 35%); }
