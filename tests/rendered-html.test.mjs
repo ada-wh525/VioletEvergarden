@@ -30,7 +30,8 @@ test("server-renders the Violet Evergarden tribute", async () => {
 
   const html = await response.text();
   assert.match(html, /薇尔莉特·伊芙加登/);
-  assert.match(html, /Violet/);
+  assert.match(html, /<span class="script-word">薇尔莉特<\/span>/);
+  assert.match(html, /<span class="serif-word">伊芙加登<\/span>/);
   assert.match(html, /写给世界的，第十四封信/);
   assert.match(html, /href="\/violet-hero-clean\.webp"/);
   assert.match(html, /人物档案/);

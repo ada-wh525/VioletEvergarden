@@ -120,22 +120,23 @@ h1 {
   display: block;
   margin-left: -.55vw;
   color: var(--gold);
-  font-size: clamp(78px, 8.1vw, 138px);
+  font-family: var(--font-serif), var(--font-sans-cn), serif;
+  font-size: clamp(70px, 7.2vw, 116px);
   font-weight: 400;
-  font-style: italic;
-  line-height: .9;
-  letter-spacing: -.055em;
-  transform: rotate(-3deg);
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: .035em;
+  transform: rotate(-2deg);
   transform-origin: left bottom;
 }
 .serif-word {
   display: block;
-  margin-top: clamp(15px, 1.25vw, 23px);
+  margin-top: clamp(18px, 1.5vw, 28px);
   max-width: 100%;
-  font-size: clamp(46px, 5.15vw, 88px);
-  line-height: .94;
-  letter-spacing: -.04em;
-  text-transform: uppercase;
+  font-family: var(--font-serif), var(--font-sans-cn), serif;
+  font-size: clamp(52px, 4.8vw, 80px);
+  line-height: 1;
+  letter-spacing: .075em;
   white-space: nowrap;
 }
 .hero-intro { max-width: 43ch; margin: 4.5vh 0 0; color: rgb(37 51 71 / 73%); font-size: 14px; line-height: 1.9; letter-spacing: .065em; }
@@ -614,8 +615,8 @@ footer.contact-footer { position: absolute; z-index: 2; left: 0; right: 0; botto
   .hero { grid-template-columns: 1fr; grid-template-rows: auto 66vh; padding-top: 76px; }
   .hero-copy { padding: 11vh 30px 9vh; }
   .hero-paper { display: none; }
-  .script-word { font-size: clamp(78px, 24vw, 135px); }
-  .serif-word { margin-top: clamp(14px, 3vw, 22px); font-size: clamp(48px, 14vw, 82px); white-space: normal; }
+  .script-word { font-size: clamp(64px, 18vw, 98px); }
+  .serif-word { margin-top: clamp(16px, 3vw, 22px); font-size: clamp(48px, 12vw, 70px); white-space: normal; }
   .hero-visual { min-height: 540px; }
   .section-shell { width: min(100% - 44px, 720px); }
   .story-section { padding-block: 110px; }
@@ -693,8 +694,8 @@ footer.contact-footer { position: absolute; z-index: 2; left: 0; right: 0; botto
   .hero-actions { align-items: center; flex-direction: row; gap: 18px; }
   .wax-seal { width: 62px; height: 62px; }
   .hero-copy { padding-inline: 22px; }
-  .script-word { font-size: clamp(70px, 23vw, 102px); }
-  .serif-word { font-size: clamp(40px, 12.5vw, 59px); }
+  .script-word { font-size: clamp(58px, 18vw, 76px); }
+  .serif-word { font-size: clamp(42px, 13.5vw, 58px); }
   .hero-visual { min-height: calc(100dvh - 76px); background-position: 69% center; }
   .hero-seal { width: 56px; height: 56px; }
   .section-shell { width: calc(100% - 36px); }

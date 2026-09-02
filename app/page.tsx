@@ -522,9 +522,9 @@ export default function Home() {
         <div className="hero-paper" aria-hidden="true" />
         <div className="hero-copy">
           <div className="eyebrow"><span>致 未曾谋面的你</span><i /></div>
-          <h1>
-            <span className="script-word">Violet</span>
-            <span className="serif-word">Evergarden</span>
+          <h1 lang="zh-CN">
+            <span className="script-word">薇尔莉特</span>
+            <span className="serif-word">伊芙加登</span>
           </h1>
           <p className="hero-intro">
             <strong>写给世界的，第十四封信。</strong>
