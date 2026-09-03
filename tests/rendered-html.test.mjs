@@ -52,6 +52,8 @@ test("keeps interaction and accessibility safeguards in place", async () => {
   assert.match(css, /prefers-reduced-motion:\s*reduce/);
   assert.match(css, /min-height:\s*100dvh/);
   assert.match(css, /violet-hero-clean\.webp/);
+  assert.match(css, /\.brand-mark\s*\{[^}]*transform:\s*none/s);
+  assert.match(css, /\.wax-seal span\s*\{[^}]*font:\s*normal/s);
   assert.doesNotMatch(`${page}\n${contact}`, /[—–]/);
 });
 

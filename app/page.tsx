@@ -403,7 +403,7 @@ export default function Home() {
       context.globalAlpha = 1;
       context.fillStyle = palette.paper;
       context.textAlign = "center";
-      context.font = `italic 500 55px ${fontFamily}`;
+      context.font = `normal 500 55px ${fontFamily}`;
       context.fillText("V", sealX, sealY + 17);
 
       context.fillStyle = palette.accent;
