@@ -37,21 +37,18 @@ Cloudflare Worker 中的 D1 绑定名必须是 `DB`。
 
 ## Cloudflare 变量
 
-在 Worker 的 `设置 > 变量和机密` 中添加运行时变量：
+在 Worker 的 `设置 > 变量和机密` 中添加以下机密：
 
 ```text
-LETTER_SUBMISSIONS_ENABLED=true
-LETTER_REACTIONS_ENABLED=true
 ADMIN_REVIEW_PASSWORD=你的审核口令
-TURNSTILE_SITE_KEY=Turnstile 的公开站点密钥
 TURNSTILE_SECRET_KEY=Turnstile 的私密密钥
 ```
 
-`ADMIN_REVIEW_PASSWORD` 和 `TURNSTILE_SECRET_KEY` 应选择“机密”类型，其余三个选择普通文本。保存变量后部署当前版本。
+这两项都应选择“机密”类型。保存后部署当前版本。Turnstile 的公开 Site Key 已作为非机密配置随代码部署，也可以通过普通文本变量 `TURNSTILE_SITE_KEY` 临时覆盖。
 
-在 Cloudflare 控制台打开 `Turnstile`，新建站点并添加 `violetever.garden`。小组件模式选择托管，创建后把站点密钥填入 `TURNSTILE_SITE_KEY`，把私密密钥填入 `TURNSTILE_SECRET_KEY`。如果还要通过 `workers.dev` 地址测试，需要把对应主机名也加入 Turnstile 的允许列表。
+在 Cloudflare 控制台打开 `Turnstile`，新建站点并添加 `violetever.garden`。小组件模式选择托管，创建后把私密密钥填入 `TURNSTILE_SECRET_KEY`。如果还要通过 `workers.dev` 地址测试，需要把对应主机名也加入 Turnstile 的允许列表。
 
-生产站始终通过 D1 API 读取和提交信件。运行时变量决定 Worker 是否接受投稿、点赞和举报。投稿表单只有在 Turnstile 浏览器验证和 Worker 服务端复核均通过后才会写入 D1。
+生产站始终通过 D1 API 读取和提交信件。投稿、点赞和举报默认开启；如需紧急关闭，可以添加普通文本变量 `LETTER_SUBMISSIONS_ENABLED=false` 或 `LETTER_REACTIONS_ENABLED=false`。投稿表单只有在 Turnstile 浏览器验证和 Worker 服务端复核均通过后才会写入 D1。
 
 ## 审核与封禁
 

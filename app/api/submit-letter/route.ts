@@ -11,7 +11,7 @@ const themes = new Set(["hydrangea", "ivory", "wine"]);
 export async function POST(request: Request) {
   try {
     const runtime = env as unknown as { LETTER_SUBMISSIONS_ENABLED?: string };
-    if (runtime.LETTER_SUBMISSIONS_ENABLED !== "true") {
+    if (runtime.LETTER_SUBMISSIONS_ENABLED?.trim().toLowerCase() === "false") {
       return Response.json({ error: "letter submissions are not enabled" }, { status: 503 });
     }
 

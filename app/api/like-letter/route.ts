@@ -7,7 +7,7 @@ import { getReaderIdentity } from "../../../lib/letter-visitor";
 export async function POST(request: Request) {
   try {
     const runtime = env as unknown as { LETTER_REACTIONS_ENABLED?: string };
-    if (runtime.LETTER_REACTIONS_ENABLED !== "true") {
+    if (runtime.LETTER_REACTIONS_ENABLED?.trim().toLowerCase() === "false") {
       return Response.json({ error: "letter reactions are not enabled" }, { status: 503 });
     }
 
