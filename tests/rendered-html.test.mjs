@@ -74,8 +74,8 @@ test("server-renders the anonymous letter exchange", async () => {
   assert.match(html, /今天，有一封信/);
   assert.match(html, /收一封信/);
   assert.match(html, /寄一封信/);
-  assert.match(html, /演示信池/);
-  assert.match(html, /内含 6 封样例来信/);
+  assert.doesNotMatch(html, /演示信池/);
+  assert.match(html, /一封没有指定收件人的信/);
 });
 
 test("server-renders the author contact page", async () => {

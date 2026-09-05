@@ -47,13 +47,7 @@ ADMIN_REVIEW_PASSWORD=你的审核口令
 
 `ADMIN_REVIEW_PASSWORD` 应选择“机密”类型，另外两个选择普通文本。保存后点“部署”。
 
-在 `设置 > 构建 > 构建变量和机密` 中添加构建变量：
-
-```text
-NEXT_PUBLIC_LETTER_API_ENABLED=true
-```
-
-然后重新部署一次。构建变量决定前端使用 D1 API 还是本地演示信池，运行时变量决定 Worker 是否接受投稿、点赞和举报。
+生产构建默认使用 D1 API，本地开发默认使用演示信池。如需让生产站临时回到演示模式，可以在构建变量中设置 `NEXT_PUBLIC_LETTER_API_ENABLED=false` 后重新构建。运行时变量决定 Worker 是否接受投稿、点赞和举报。
 
 ## 审核与封禁
 

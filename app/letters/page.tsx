@@ -19,7 +19,9 @@ type ViewMode = "receive" | "send";
 type ReadState = "sealed" | "loading" | "open" | "error" | "empty";
 type SubmitState = "idle" | "sending" | "success" | "error";
 
-const LETTER_API_ENABLED = process.env.NEXT_PUBLIC_LETTER_API_ENABLED === "true";
+const LETTER_API_ENABLED =
+  process.env.NEXT_PUBLIC_LETTER_API_ENABLED === "true" ||
+  (process.env.NODE_ENV === "production" && process.env.NEXT_PUBLIC_LETTER_API_ENABLED !== "false");
 const PENDING_STORAGE_KEY = "violet-pending-letters";
 const REPORTED_STORAGE_KEY = "violet-reported-letters";
 const LIKED_STORAGE_KEY = "violet-liked-letters";
