@@ -40,12 +40,14 @@ test("server-renders the Violet Evergarden tribute", async () => {
 });
 
 test("keeps interaction and accessibility safeguards in place", async () => {
-  const [page, css, contact, letters, admin, turnstileWidget, turnstileServer, submitRoute, likeRoute, reportRoute, hosting, viteConfig] = await Promise.all([
+  const [page, css, contact, letters, admin, defaultLetters, randomRoute, turnstileWidget, turnstileServer, submitRoute, likeRoute, reportRoute, hosting, viteConfig] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
     readFile(new URL("../app/contact/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/letters/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/admin/letters/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../lib/default-letters.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/random-letter/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../components/turnstile-widget.tsx", import.meta.url), "utf8"),
     readFile(new URL("../lib/turnstile.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/api/submit-letter/route.ts", import.meta.url), "utf8"),
@@ -69,8 +71,14 @@ test("keeps interaction and accessibility safeguards in place", async () => {
   assert.match(letters, /\/api\/submit-letter/);
   assert.match(letters, /\/api\/report-letter/);
   assert.match(letters, /\/api\/like-letter/);
+  assert.match(letters, /<a href="\/" aria-label="返回薇尔莉特纪念站首页">/);
+  assert.match(letters, /<a className="letters-home-link" href="\/">返回纪念站/);
   assert.match(letters, /turnstileToken/);
   assert.doesNotMatch(letters, /SAMPLE_LETTERS|LETTER_API_ENABLED|localStorage|演示/);
+  assert.match(defaultLetters, /archive-01/);
+  assert.match(defaultLetters, /archive-06/);
+  assert.match(randomRoute, /DEFAULT_LETTERS/);
+  assert.match(randomRoute, /onConflictDoNothing/);
   assert.match(turnstileWidget, /challenges\.cloudflare\.com\/turnstile\/v0\/api\.js\?render=explicit/);
   assert.match(turnstileWidget, /action:\s*"submit_letter"/);
   assert.match(turnstileServer, /challenges\.cloudflare\.com\/turnstile\/v0\/siteverify/);

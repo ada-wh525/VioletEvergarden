@@ -1,6 +1,7 @@
 import { and, asc, eq, gte } from "drizzle-orm";
 import { getDb } from "../../../db";
 import { letters } from "../../../db/schema";
+import { DEFAULT_LETTERS } from "../../../lib/default-letters";
 
 function displayDate(value: string) {
   const date = new Date(value.endsWith("Z") ? value : `${value}Z`);
@@ -35,6 +36,17 @@ export async function GET() {
       .limit(1);
 
     if (!letter) {
+      [letter] = await db
+        .select(fields)
+        .from(letters)
+        .where(eq(letters.status, "published"))
+        .orderBy(asc(letters.randomKey))
+        .limit(1);
+    }
+
+    if (!letter) {
+      await db.insert(letters).values(DEFAULT_LETTERS).onConflictDoNothing();
+
       [letter] = await db
         .select(fields)
         .from(letters)

@@ -1,6 +1,7 @@
 "use client";
 
-import Link from "next/link";
+/* eslint-disable @next/next/no-html-link-for-pages -- this standalone exchange intentionally uses full-page navigation */
+
 import { FormEvent, useRef, useState } from "react";
 import { TurnstileWidget } from "../../components/turnstile-widget";
 
@@ -21,6 +22,14 @@ type ReadState = "sealed" | "loading" | "open" | "error" | "empty";
 type SubmitState = "idle" | "sending" | "success" | "error";
 
 const MAX_LETTER_LENGTH = 600;
+
+function displayLetterNumber(id: string) {
+  const archiveNumber = id.match(/^archive-(\d+)$/)?.[1];
+  if (archiveNumber) return archiveNumber;
+
+  const compactId = id.replace(/[^a-z0-9]/gi, "").slice(-6).toUpperCase();
+  return compactId || "000001";
+}
 
 const THEMES: Array<{ id: LetterTheme; name: string; note: string }> = [
   { id: "hydrangea", name: "绣球花蓝", note: "安静而清澈" },
@@ -189,8 +198,8 @@ export default function LettersPage() {
   return (
     <main className="letters-page">
       <nav className="letters-nav" aria-label="陌生来信导航">
-        <Link href="/" aria-label="返回薇尔莉特纪念站首页"><Brand /></Link>
-        <Link className="letters-home-link" href="/">返回纪念站 <span>↗</span></Link>
+        <a href="/" aria-label="返回薇尔莉特纪念站首页"><Brand /></a>
+        <a className="letters-home-link" href="/">返回纪念站 <span>↗</span></a>
       </nav>
 
       <section className="letters-exchange">
@@ -221,7 +230,7 @@ export default function LettersPage() {
                 <article className={`stranger-letter letter-theme-${currentLetter.theme}`}>
                   <div className="stranger-letter-airmail" aria-hidden="true" />
                   <header>
-                    <span>LETTER NO. {currentLetter.id.replace("demo-", "")}</span>
+                    <span>LETTER NO. {displayLetterNumber(currentLetter.id)}</span>
                     <time>{currentLetter.date}</time>
                   </header>
                   <h2 ref={letterHeadingRef} tabIndex={-1}>{currentLetter.addressee}</h2>
@@ -320,7 +329,7 @@ export default function LettersPage() {
 
       <footer className="letters-footer">
         <span>LETTERS FROM THE HEART · FAN MADE PROJECT</span>
-        <div><Link href="/contact">联系作者</Link><Link href="/">返回纪念站</Link></div>
+        <div><a href="/contact">联系作者</a><a href="/">返回纪念站</a></div>
       </footer>
     </main>
   );

@@ -1,0 +1,73 @@
+import type { InferInsertModel } from "drizzle-orm";
+import type { letters } from "../db/schema";
+
+type NewLetter = InferInsertModel<typeof letters>;
+
+export const DEFAULT_LETTERS: NewLetter[] = [
+  {
+    id: "archive-01",
+    addressee: "写给同样在等待答案的人",
+    content: "我曾以为等待是一间没有窗的房间，后来才发现，只要还愿意等，心里就仍然留着一扇门。\n\n如果你今天也没有等到想要的回答，请先替明天保管一点期待。并不是所有迟来的话都会失去意义。\n\n愿下一次风吹过来的时候，你能听见属于自己的回音。",
+    author: "北方港口的旅人",
+    theme: "hydrangea",
+    status: "published",
+    randomKey: 0.08,
+    riskScore: 0,
+    moderationFlags: "[]",
+  },
+  {
+    id: "archive-02",
+    addressee: "给一位还没来得及道歉的陌生人",
+    content: "很久以前，我把一句对不起留在了车站。列车开走以后，我才知道有些话不说出口，就会在心里反复抵达。\n\n后来我写了一封没有地址的信，不求被原谅，只想承认那一天的沉默确实伤害了一个珍贵的人。\n\n如果你也有一句迟到的话，希望你比我勇敢一点。",
+    author: "一位正在学会告别的人",
+    theme: "ivory",
+    status: "published",
+    randomKey: 0.23,
+    riskScore: 0,
+    moderationFlags: "[]",
+  },
+  {
+    id: "archive-03",
+    addressee: "给偶然拆开这封信的你",
+    content: "今天的天空很普通，我却忽然想把它寄给一个不认识的人。云走得很慢，街边的花开了一小簇，面包店比平时早亮了灯。\n\n也许生活真正温柔的地方，就藏在这些没人特意记录的时刻里。\n\n希望你读到这里时，也能抬头找到一件值得喜欢的小事。",
+    author: "来自雨季的读者",
+    theme: "hydrangea",
+    status: "published",
+    randomKey: 0.39,
+    riskScore: 0,
+    moderationFlags: "[]",
+  },
+  {
+    id: "archive-04",
+    addressee: "写给没有说出口的喜欢",
+    content: "我没有把喜欢告诉那个人。不是因为它不够真，而是因为那时的我还不知道，真心也需要被好好表达。\n\n现在我们已经走向不同的地方。回望过去，我不再遗憾结局，只遗憾自己曾把温柔藏得太深。\n\n愿你珍惜心里的光，也有把它交给某个人的勇气。",
+    author: "莱顿城外的一盏灯",
+    theme: "wine",
+    status: "published",
+    randomKey: 0.55,
+    riskScore: 0,
+    moderationFlags: "[]",
+  },
+  {
+    id: "archive-05",
+    addressee: "给正在努力长大的你",
+    content: "长大好像不是突然懂得一切，而是终于允许自己有不懂的事。允许失落，允许绕路，也允许在很累的时候停下来。\n\n你不需要每一天都表现得坚强。那些认真生活却没有被看见的时刻，也在一点点组成你。\n\n请相信，缓慢并不等于停滞。",
+    author: "旧钟楼下的邮差",
+    theme: "ivory",
+    status: "published",
+    randomKey: 0.72,
+    riskScore: 0,
+    moderationFlags: "[]",
+  },
+  {
+    id: "archive-06",
+    addressee: "写给很久没有好好休息的人",
+    content: "你是不是已经习惯在别人问起时回答没关系，然后把疲惫安静地折好，塞进没人看见的口袋里。\n\n今晚请早一点关掉灯。没有完成的事情可以留给明天，世界不会因为你休息一会儿就失去方向。\n\n好好睡一觉。醒来的你，也值得被新的清晨接住。",
+    author: "一封没有回信地址的信",
+    theme: "wine",
+    status: "published",
+    randomKey: 0.89,
+    riskScore: 0,
+    moderationFlags: "[]",
+  },
+];
