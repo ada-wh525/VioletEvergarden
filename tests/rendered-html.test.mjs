@@ -40,13 +40,14 @@ test("server-renders the Violet Evergarden tribute", async () => {
 });
 
 test("keeps interaction and accessibility safeguards in place", async () => {
-  const [page, css, contact, letters, admin, database, defaultLetters, randomRoute, turnstileWidget, turnstileServer, submitRoute, likeRoute, reportRoute, hosting, viteConfig] = await Promise.all([
+  const [page, css, contact, letters, admin, database, deliveryFlight, defaultLetters, randomRoute, turnstileWidget, turnstileServer, submitRoute, likeRoute, reportRoute, hosting, viteConfig] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
     readFile(new URL("../app/contact/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/letters/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/admin/letters/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../db/index.ts", import.meta.url), "utf8"),
+    readFile(new URL("../components/letter-delivery-flight.tsx", import.meta.url), "utf8"),
     readFile(new URL("../lib/default-letters.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/api/random-letter/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../components/turnstile-widget.tsx", import.meta.url), "utf8"),
@@ -67,6 +68,8 @@ test("keeps interaction and accessibility safeguards in place", async () => {
   assert.match(css, /violet-hero-clean\.webp/);
   assert.match(css, /\.brand-mark\s*\{[^}]*transform:\s*none/s);
   assert.match(css, /\.wax-seal span\s*\{[^}]*font:\s*normal/s);
+  assert.match(css, /\.letter-submitted::before\s*\{[^}]*pointer-events:\s*none/s);
+  assert.match(page, /<LetterDeliveryFlight state=\{deliveryState\}/);
   assert.match(letters, /role="tablist"/);
   assert.match(letters, /\/api\/random-letter/);
   assert.match(letters, /\/api\/submit-letter/);
@@ -75,6 +78,11 @@ test("keeps interaction and accessibility safeguards in place", async () => {
   assert.match(letters, /<a href="\/" aria-label="返回薇尔莉特纪念站首页">/);
   assert.match(letters, /<a className="letters-home-link" href="\/">返回纪念站/);
   assert.match(letters, /turnstileToken/);
+  assert.match(letters, /setDeliveryState\("sending"\)/);
+  assert.match(letters, /onClick=\{returnToWriting\}/);
+  assert.match(letters, /deliveredTitle="信件已进入审核队列"/);
+  assert.match(deliveryFlight, /delivery-flight/);
+  assert.match(deliveryFlight, /DELIVERING YOUR LETTER/);
   assert.match(letters, /也许路途遥远，但是信总有一天会收到的。/);
   assert.doesNotMatch(letters, /不设公开评论和热度排行/);
   assert.doesNotMatch(letters, /SAMPLE_LETTERS|LETTER_API_ENABLED|localStorage|演示/);

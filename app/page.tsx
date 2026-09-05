@@ -1,6 +1,7 @@
 "use client";
 
 import { type CSSProperties, useEffect, useRef, useState } from "react";
+import { LetterDeliveryFlight, type LetterDeliveryState } from "../components/letter-delivery-flight";
 
 const profile = [
   { label: "日文名", value: "ヴァイオレット・エヴァーガーデン" },
@@ -163,7 +164,7 @@ export default function Home() {
   const [letterText, setLetterText] = useState("");
   const [signature, setSignature] = useState("");
   const [sealed, setSealed] = useState(false);
-  const [deliveryState, setDeliveryState] = useState<"idle" | "sending" | "delivered">("idle");
+  const [deliveryState, setDeliveryState] = useState<LetterDeliveryState>("idle");
   const [keepsakeOpen, setKeepsakeOpen] = useState(false);
   const [keepsakeUrl, setKeepsakeUrl] = useState("");
   const [keepsakeStatus, setKeepsakeStatus] = useState<"idle" | "generating" | "ready" | "error">("idle");
@@ -795,16 +796,7 @@ export default function Home() {
         <a className="secret-contact" href="/contact"><span>✦</span> 隐秘角落 · 联系作者</a>
       </footer>
 
-      {deliveryState !== "idle" && (
-        <div className={`delivery-flight ${deliveryState}`} role="status" aria-live="polite">
-          <div className="flight-orbit" aria-hidden="true"><i /><i /><i /></div>
-          <div className="flight-envelope" aria-hidden="true"><span /><i>V</i></div>
-          <p>
-            <strong>{deliveryState === "sending" ? "信件正在启程" : "心意已经送达"}</strong>
-            <span>{deliveryState === "sending" ? "DELIVERING YOUR LETTER" : "DELIVERED WITH LOVE"}</span>
-          </p>
-        </div>
-      )}
+      <LetterDeliveryFlight state={deliveryState} />
 
       {keepsakeOpen && (
         <div className="keepsake-overlay" role="dialog" aria-modal="true" aria-labelledby="keepsake-title" aria-describedby="keepsake-description" ref={keepsakeDialogRef}>

@@ -2,7 +2,8 @@
 
 /* eslint-disable @next/next/no-html-link-for-pages -- this standalone exchange intentionally uses full-page navigation */
 
-import { FormEvent, useRef, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
+import { LetterDeliveryFlight, type LetterDeliveryState } from "../../components/letter-delivery-flight";
 import { TurnstileWidget } from "../../components/turnstile-widget";
 
 type LetterTheme = "hydrangea" | "ivory" | "wine";
@@ -57,15 +58,38 @@ export default function LettersPage() {
   const [theme, setTheme] = useState<LetterTheme>("hydrangea");
   const [privacyConfirmed, setPrivacyConfirmed] = useState(false);
   const [submitState, setSubmitState] = useState<SubmitState>("idle");
+  const [deliveryState, setDeliveryState] = useState<LetterDeliveryState>("idle");
   const [submitMessage, setSubmitMessage] = useState("");
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [turnstileState, setTurnstileState] = useState<"loading" | "ready" | "verified" | "error">("loading");
   const [turnstileResetKey, setTurnstileResetKey] = useState(0);
   const letterHeadingRef = useRef<HTMLHeadingElement>(null);
 
+  useEffect(() => {
+    if (deliveryState === "idle") return;
+
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const delay = deliveryState === "sending"
+      ? reducedMotion ? 80 : 2400
+      : reducedMotion ? 120 : 1200;
+    const timer = window.setTimeout(() => {
+      setDeliveryState(deliveryState === "sending" ? "delivered" : "idle");
+    }, delay);
+
+    return () => window.clearTimeout(timer);
+  }, [deliveryState]);
+
   const switchMode = (nextMode: ViewMode) => {
     setMode(nextMode);
     setSubmitMessage("");
+    setDeliveryState("idle");
+  };
+
+  const returnToWriting = () => {
+    setSubmitState("idle");
+    setSubmitMessage("");
+    setDeliveryState("idle");
+    setTurnstileResetKey((value) => value + 1);
   };
 
   const openRandomLetter = async () => {
@@ -177,6 +201,7 @@ export default function LettersPage() {
       setPrivacyConfirmed(false);
       setTurnstileToken(null);
       setSubmitState("success");
+      setDeliveryState("sending");
       setSubmitMessage("信件已进入审核队列。通过后，它会出现在陌生来信的信池中。");
     } catch (error) {
       const reason = error instanceof Error ? error.message : "submission_failed";
@@ -276,7 +301,7 @@ export default function LettersPage() {
                   <h2>信件已送达<br />审核队列。</h2>
                   <span>{submitMessage}</span>
                   <div>
-                    <button type="button" onClick={() => { setSubmitState("idle"); setSubmitMessage(""); setTurnstileResetKey((value) => value + 1); }}>返回写信</button>
+                    <button type="button" onClick={returnToWriting}>返回写信</button>
                     <button type="button" onClick={() => switchMode("receive")}>去收一封信 <b>→</b></button>
                   </div>
                 </div>
@@ -331,6 +356,12 @@ export default function LettersPage() {
         <span>LETTERS FROM THE HEART · FAN MADE PROJECT</span>
         <div><a href="/contact">联系作者</a><a href="/">返回纪念站</a></div>
       </footer>
+
+      <LetterDeliveryFlight
+        state={deliveryState}
+        deliveredTitle="信件已进入审核队列"
+        deliveredLabel="DELIVERED TO THE REVIEW OFFICE"
+      />
     </main>
   );
 }
