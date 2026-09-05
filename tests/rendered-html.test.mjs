@@ -40,7 +40,7 @@ test("server-renders the Violet Evergarden tribute", async () => {
 });
 
 test("keeps interaction and accessibility safeguards in place", async () => {
-  const [page, css, contact, letters, admin, turnstileWidget, turnstileServer, submitRoute, likeRoute, reportRoute] = await Promise.all([
+  const [page, css, contact, letters, admin, turnstileWidget, turnstileServer, submitRoute, likeRoute, reportRoute, hosting, viteConfig] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
     readFile(new URL("../app/contact/page.tsx", import.meta.url), "utf8"),
@@ -51,6 +51,8 @@ test("keeps interaction and accessibility safeguards in place", async () => {
     readFile(new URL("../app/api/submit-letter/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/api/like-letter/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/api/report-letter/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../.openai/hosting.json", import.meta.url), "utf8"),
+    readFile(new URL("../vite.config.ts", import.meta.url), "utf8"),
   ]);
 
   assert.doesNotMatch(page, /window\.addEventListener\(["']scroll/);
@@ -77,6 +79,9 @@ test("keeps interaction and accessibility safeguards in place", async () => {
   assert.match(submitRoute, /LETTER_SUBMISSIONS_ENABLED\?\.trim\(\)\.toLowerCase\(\) === "false"/);
   assert.match(likeRoute, /LETTER_REACTIONS_ENABLED\?\.trim\(\)\.toLowerCase\(\) === "false"/);
   assert.match(reportRoute, /LETTER_REACTIONS_ENABLED\?\.trim\(\)\.toLowerCase\(\) === "false"/);
+  assert.equal(JSON.parse(hosting).d1, "DB");
+  assert.match(viteConfig, /database_name:\s*"violet-letters-prod"/);
+  assert.match(viteConfig, /LETTER_SUBMISSIONS_ENABLED:\s*"true"/);
   assert.doesNotMatch(`${page}\n${contact}\n${letters}\n${admin}`, /[—–]/);
 });
 

@@ -24,7 +24,7 @@ npm run dev
 
 ## Cloudflare D1
 
-Cloudflare Worker 中的 D1 绑定名必须是 `DB`。
+Cloudflare Worker 中的 D1 绑定名固定为 `DB`，数据库名称为 `violet-letters-prod`。逻辑绑定和数据库 ID 已随部署配置保存，Git 自动部署会继续携带该绑定。
 
 新数据库按顺序执行：
 
@@ -48,7 +48,7 @@ TURNSTILE_SECRET_KEY=Turnstile 的私密密钥
 
 在 Cloudflare 控制台打开 `Turnstile`，新建站点并添加 `violetever.garden`。小组件模式选择托管，创建后把私密密钥填入 `TURNSTILE_SECRET_KEY`。如果还要通过 `workers.dev` 地址测试，需要把对应主机名也加入 Turnstile 的允许列表。
 
-生产站始终通过 D1 API 读取和提交信件。投稿、点赞和举报默认开启；如需紧急关闭，可以添加普通文本变量 `LETTER_SUBMISSIONS_ENABLED=false` 或 `LETTER_REACTIONS_ENABLED=false`。投稿表单只有在 Turnstile 浏览器验证和 Worker 服务端复核均通过后才会写入 D1。
+生产站始终通过 D1 API 读取和提交信件。投稿、点赞和举报默认开启，普通变量与公开 Site Key 已随部署配置保存；如需紧急关闭，可以在 Cloudflare 中把 `LETTER_SUBMISSIONS_ENABLED` 或 `LETTER_REACTIONS_ENABLED` 改为 `false`。投稿表单只有在 Turnstile 浏览器验证和 Worker 服务端复核均通过后才会写入 D1。
 
 ## 审核与封禁
 
