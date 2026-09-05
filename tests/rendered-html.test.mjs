@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
+import { MODERATION_KEYWORDS, moderateLetter } from "../lib/letter-moderation.mjs";
 
 async function render(pathname = "/") {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
@@ -39,10 +40,12 @@ test("server-renders the Violet Evergarden tribute", async () => {
 });
 
 test("keeps interaction and accessibility safeguards in place", async () => {
-  const [page, css, contact] = await Promise.all([
+  const [page, css, contact, letters, admin] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
     readFile(new URL("../app/contact/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/letters/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/admin/letters/page.tsx", import.meta.url), "utf8"),
   ]);
 
   assert.doesNotMatch(page, /window\.addEventListener\(["']scroll/);
@@ -54,7 +57,25 @@ test("keeps interaction and accessibility safeguards in place", async () => {
   assert.match(css, /violet-hero-clean\.webp/);
   assert.match(css, /\.brand-mark\s*\{[^}]*transform:\s*none/s);
   assert.match(css, /\.wax-seal span\s*\{[^}]*font:\s*normal/s);
-  assert.doesNotMatch(`${page}\n${contact}`, /[—–]/);
+  assert.match(letters, /role="tablist"/);
+  assert.match(letters, /\/api\/random-letter/);
+  assert.match(letters, /\/api\/submit-letter/);
+  assert.match(letters, /\/api\/report-letter/);
+  assert.match(letters, /\/api\/like-letter/);
+  assert.match(letters, /violet-pending-letters/);
+  assert.doesNotMatch(`${page}\n${contact}\n${letters}\n${admin}`, /[—–]/);
+});
+
+test("server-renders the anonymous letter exchange", async () => {
+  const response = await render("/letters");
+  assert.equal(response.status, 200);
+
+  const html = await response.text();
+  assert.match(html, /今天，有一封信/);
+  assert.match(html, /收一封信/);
+  assert.match(html, /寄一封信/);
+  assert.match(html, /演示信池/);
+  assert.match(html, /内含 6 封样例来信/);
 });
 
 test("server-renders the author contact page", async () => {
@@ -66,4 +87,32 @@ test("server-renders the author contact page", async () => {
   assert.match(html, /550677115@qq\.com/);
   assert.match(html, /寄给作者/);
   assert.match(html, /Web3Forms/);
+});
+
+test("server-renders the protected letter review page", async () => {
+  const response = await render("/admin/letters");
+  assert.equal(response.status, 200);
+
+  const html = await response.text();
+  assert.match(html, /进入信件审核室|正在确认身份/);
+  assert.match(html, /PRIVATE REVIEW OFFICE/);
+});
+
+test("scores risky letters and blocks private contact information", () => {
+  const ordinary = moderateLetter("今天路过花店时想起了你，愿你一切都好。");
+  assert.equal(ordinary.riskScore, 0);
+  assert.equal(ordinary.hardBlock, false);
+
+  const selfHarm = moderateLetter("最近我总在想轻 生，也有过伤害自己的念头。");
+  assert.ok(selfHarm.riskScore >= 80);
+  assert.ok(selfHarm.flags.includes("self_harm"));
+
+  const spam = moderateLetter("加入我们就能刷 单返 利，保证稳赚不赔。");
+  assert.ok(spam.flags.includes("scam_spam"));
+
+  const contact = moderateLetter("请联系我的邮箱 reader@example.com");
+  assert.equal(contact.hardBlock, true);
+  assert.ok(contact.flags.includes("personal_information"));
+
+  assert.ok(Object.keys(MODERATION_KEYWORDS).length >= 8);
 });

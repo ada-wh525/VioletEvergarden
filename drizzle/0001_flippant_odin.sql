@@ -1,0 +1,1 @@
+ALTER TABLE `letters` ADD `moderation_flags` text DEFAULT '[]' NOT NULL;

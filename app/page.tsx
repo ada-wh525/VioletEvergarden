@@ -505,6 +505,7 @@ export default function Home() {
           <a className={activeSection === "profile" ? "active" : ""} aria-current={activeSection === "profile" ? "location" : undefined} href="#profile" onClick={() => setMenuOpen(false)}>人物档案</a>
           <a className={activeSection === "journey" ? "active" : ""} aria-current={activeSection === "journey" ? "location" : undefined} href="#journey" onClick={() => setMenuOpen(false)}>书信旅程</a>
           <a className={activeSection === "support" ? "active" : ""} aria-current={activeSection === "support" ? "location" : undefined} href="#support" onClick={() => setMenuOpen(false)}>应援手册</a>
+          <a href="/letters" onClick={() => setMenuOpen(false)}>陌生来信</a>
         </div>
         <button
           className="sound-toggle"
@@ -598,7 +599,6 @@ export default function Home() {
                 <div className="profile-row" key={item.label}>
                   <span>{item.label}</span>
                   <strong>{item.value}</strong>
-                  {item.note && <small>{item.note}</small>}
                 </div>
               ))}
             </div>
@@ -786,6 +786,7 @@ export default function Home() {
           <div><b>LETTERS FROM THE HEART</b><p>一封由爱好者写给薇尔莉特的信</p></div>
         </div>
         <div className="footer-links">
+          <a href="/letters">随机收信与投递 ↗</a>
           <a href="https://tv.violet-evergarden.jp/" target="_blank" rel="noreferrer">TV 动画官方网站 ↗</a>
           <a href="https://violet-evergarden.jp/" target="_blank" rel="noreferrer">剧场版官方网站 ↗</a>
           <a href="#top">回到信首 ↑</a>
