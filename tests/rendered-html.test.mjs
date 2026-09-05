@@ -40,12 +40,13 @@ test("server-renders the Violet Evergarden tribute", async () => {
 });
 
 test("keeps interaction and accessibility safeguards in place", async () => {
-  const [page, css, contact, letters, admin, defaultLetters, randomRoute, turnstileWidget, turnstileServer, submitRoute, likeRoute, reportRoute, hosting, viteConfig] = await Promise.all([
+  const [page, css, contact, letters, admin, database, defaultLetters, randomRoute, turnstileWidget, turnstileServer, submitRoute, likeRoute, reportRoute, hosting, viteConfig] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
     readFile(new URL("../app/contact/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/letters/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/admin/letters/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../db/index.ts", import.meta.url), "utf8"),
     readFile(new URL("../lib/default-letters.ts", import.meta.url), "utf8"),
     readFile(new URL("../app/api/random-letter/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../components/turnstile-widget.tsx", import.meta.url), "utf8"),
@@ -74,7 +75,13 @@ test("keeps interaction and accessibility safeguards in place", async () => {
   assert.match(letters, /<a href="\/" aria-label="返回薇尔莉特纪念站首页">/);
   assert.match(letters, /<a className="letters-home-link" href="\/">返回纪念站/);
   assert.match(letters, /turnstileToken/);
+  assert.match(letters, /也许路途遥远，但是信总有一天会收到的。/);
+  assert.doesNotMatch(letters, /不设公开评论和热度排行/);
   assert.doesNotMatch(letters, /SAMPLE_LETTERS|LETTER_API_ENABLED|localStorage|演示/);
+  assert.match(database, /PRAGMA table_info\(letters\)/);
+  assert.match(database, /ALTER TABLE letters ADD visitor_id text/);
+  assert.match(database, /CREATE TABLE IF NOT EXISTS banned_visitors/);
+  assert.match(database, /CREATE TABLE IF NOT EXISTS letter_actions/);
   assert.match(defaultLetters, /archive-01/);
   assert.match(defaultLetters, /archive-06/);
   assert.match(randomRoute, /DEFAULT_LETTERS/);

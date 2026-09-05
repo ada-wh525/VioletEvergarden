@@ -206,7 +206,7 @@ export default function LettersPage() {
         <div className="letters-intro">
           <p className="letters-kicker">LETTERS BETWEEN STRANGERS</p>
           <h1>今天，有一封信<br /><em>寄到了你这里。</em></h1>
-          <p className="letters-lead">不设公开评论和热度排行。每一次只拆开一封信，安静读完另一个人未能说出口的话。</p>
+          <p className="letters-lead">每一次只拆开一封信，安静读完另一个人未能说出口的话。</p>
 
           <div className="letters-mode-switch" role="tablist" aria-label="陌生来信功能">
             <button id="receive-tab" type="button" role="tab" aria-selected={mode === "receive"} aria-controls="receive-panel" onClick={() => switchMode("receive")}>
@@ -260,7 +260,7 @@ export default function LettersPage() {
                   </div>
                   <p className="mailbox-index">POST OFFICE · LEIDENSCHAFTLICH</p>
                   <h2>{readState === "error" ? "信箱暂时被风吹乱了" : readState === "empty" ? "今天的信池已经空了" : "一封没有指定收件人的信"}</h2>
-                  <p>{readState === "error" ? "请稍后再来，邮差会重新整理好信件。" : readState === "empty" ? "等新的来信通过审核后，再回来看看。" : "它来自一个与你未曾谋面的人。"}</p>
+                  <p>{readState === "error" ? "请稍后再来，邮差会重新整理好信件。" : readState === "empty" ? "也许路途遥远，但是信总有一天会收到的。" : "它来自一个与你未曾谋面的人。"}</p>
                   <button className="open-letter-button" type="button" onClick={() => void openRandomLetter()} disabled={readState === "loading"}>
                     <span aria-hidden="true">✉</span>{readState === "loading" ? "正在取信" : readState === "error" ? "重新取信" : "拆开这封信"}
                   </button>

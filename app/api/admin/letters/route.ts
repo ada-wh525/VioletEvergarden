@@ -1,5 +1,5 @@
 import { desc } from "drizzle-orm";
-import { getDb } from "../../../../db";
+import { ensureLetterSchema, getDb } from "../../../../db";
 import { bannedVisitors, letters } from "../../../../db/schema";
 import { isAdminRequest } from "../../../../lib/admin-session";
 
@@ -18,6 +18,7 @@ export async function GET(request: Request) {
   }
 
   try {
+    await ensureLetterSchema();
     const db = getDb();
     const rows = await db.select().from(letters).orderBy(desc(letters.riskScore), desc(letters.reportCount), desc(letters.createdAt)).limit(250);
     const bans = await db.select({ visitorId: bannedVisitors.visitorId }).from(bannedVisitors);

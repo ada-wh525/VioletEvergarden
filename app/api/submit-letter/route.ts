@@ -1,5 +1,5 @@
 import { env } from "cloudflare:workers";
-import { getDb } from "../../../db";
+import { ensureLetterSchema, getDb } from "../../../db";
 import { eq } from "drizzle-orm";
 import { bannedVisitors, letters } from "../../../db/schema";
 import { moderateLetter } from "../../../lib/letter-moderation.mjs";
@@ -46,6 +46,7 @@ export async function POST(request: Request) {
       return Response.json({ error: "please remove private contact information" }, { status: 400 });
     }
 
+    await ensureLetterSchema();
     const db = getDb();
     const identity = getReaderIdentity(request);
     const [ban] = await db.select({ id: bannedVisitors.id }).from(bannedVisitors).where(eq(bannedVisitors.visitorId, identity.visitorId)).limit(1);

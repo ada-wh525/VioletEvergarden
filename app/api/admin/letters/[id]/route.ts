@@ -1,5 +1,5 @@
 import { eq, sql } from "drizzle-orm";
-import { getDb } from "../../../../../db";
+import { ensureLetterSchema, getDb } from "../../../../../db";
 import { bannedVisitors, letters } from "../../../../../db/schema";
 import { isAdminRequest } from "../../../../../lib/admin-session";
 
@@ -13,6 +13,7 @@ export async function PATCH(request: Request, context: RouteContext) {
   try {
     const { id } = await context.params;
     const payload = (await request.json()) as { action?: "publish" | "reject" | "pending" | "ban" | "unban"; reason?: string };
+    await ensureLetterSchema();
     const db = getDb();
 
     if (payload.action === "ban" || payload.action === "unban") {
@@ -61,6 +62,7 @@ export async function DELETE(request: Request, context: RouteContext) {
 
   try {
     const { id } = await context.params;
+    await ensureLetterSchema();
     const db = getDb();
     const [removed] = await db.delete(letters).where(eq(letters.id, id)).returning({ id: letters.id });
     if (!removed) return Response.json({ error: "letter not found" }, { status: 404 });

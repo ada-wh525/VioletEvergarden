@@ -1,6 +1,6 @@
 import { env } from "cloudflare:workers";
 import { and, eq, sql } from "drizzle-orm";
-import { getDb } from "../../../db";
+import { ensureLetterSchema, getDb } from "../../../db";
 import { bannedVisitors, letterActions, letters } from "../../../db/schema";
 import { getReaderIdentity } from "../../../lib/letter-visitor";
 
@@ -15,6 +15,7 @@ export async function POST(request: Request) {
     const id = payload.id?.trim() ?? "";
     if (!id) return Response.json({ error: "letter id is required" }, { status: 400 });
 
+    await ensureLetterSchema();
     const db = getDb();
     const identity = getReaderIdentity(request);
     const [ban] = await db.select({ id: bannedVisitors.id }).from(bannedVisitors).where(eq(bannedVisitors.visitorId, identity.visitorId)).limit(1);

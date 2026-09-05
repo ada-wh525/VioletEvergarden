@@ -1,5 +1,5 @@
 import { and, asc, eq, gte, sql } from "drizzle-orm";
-import { getDb } from "../../../db";
+import { ensureLetterSchema, getDb } from "../../../db";
 import { letters } from "../../../db/schema";
 import { DEFAULT_LETTERS } from "../../../lib/default-letters";
 
@@ -16,6 +16,7 @@ function displayDate(value: string) {
 
 export async function GET() {
   try {
+    await ensureLetterSchema();
     const db = getDb();
     const pivot = Math.random();
     const fields = {
