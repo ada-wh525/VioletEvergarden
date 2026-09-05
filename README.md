@@ -11,7 +11,7 @@ npm install
 npm run dev
 ```
 
-访问 `http://localhost:3000`。本地未连接 D1 时，`/letters` 会使用内置的 6 封演示信。
+访问 `http://localhost:3000`。陌生来信功能需要可用的 D1 绑定和 Turnstile 配置，本地页面不会生成替代投稿或替代信件。
 
 ## 页面入口
 
@@ -43,11 +43,15 @@ Cloudflare Worker 中的 D1 绑定名必须是 `DB`。
 LETTER_SUBMISSIONS_ENABLED=true
 LETTER_REACTIONS_ENABLED=true
 ADMIN_REVIEW_PASSWORD=你的审核口令
+TURNSTILE_SITE_KEY=Turnstile 的公开站点密钥
+TURNSTILE_SECRET_KEY=Turnstile 的私密密钥
 ```
 
-`ADMIN_REVIEW_PASSWORD` 应选择“机密”类型，另外两个选择普通文本。保存后点“部署”。
+`ADMIN_REVIEW_PASSWORD` 和 `TURNSTILE_SECRET_KEY` 应选择“机密”类型，其余三个选择普通文本。保存变量后部署当前版本。
 
-生产构建默认使用 D1 API，本地开发默认使用演示信池。如需让生产站临时回到演示模式，可以在构建变量中设置 `NEXT_PUBLIC_LETTER_API_ENABLED=false` 后重新构建。运行时变量决定 Worker 是否接受投稿、点赞和举报。
+在 Cloudflare 控制台打开 `Turnstile`，新建站点并添加 `violetever.garden`。小组件模式选择托管，创建后把站点密钥填入 `TURNSTILE_SITE_KEY`，把私密密钥填入 `TURNSTILE_SECRET_KEY`。如果还要通过 `workers.dev` 地址测试，需要把对应主机名也加入 Turnstile 的允许列表。
+
+生产站始终通过 D1 API 读取和提交信件。运行时变量决定 Worker 是否接受投稿、点赞和举报。投稿表单只有在 Turnstile 浏览器验证和 Worker 服务端复核均通过后才会写入 D1。
 
 ## 审核与封禁
 
@@ -58,7 +62,7 @@ ADMIN_REVIEW_PASSWORD=你的审核口令
 - 封禁投稿者会拒绝该匿名身份的全部来信，并阻止它继续投稿、点赞或举报。
 - 解除封禁不会自动恢复旧信，仍需逐封重新审核。
 
-匿名封禁依赖浏览器 Cookie。访客主动清除 Cookie 后会获得新的匿名身份，因此它适合日常管理，不等同于账号级或网络级封禁。需要更强防护时，可在 Cloudflare 中为审核路径配置 Access，并为写入接口增加 Turnstile 与速率限制。
+匿名封禁依赖浏览器 Cookie。访客主动清除 Cookie 后会获得新的匿名身份，因此它适合日常管理，不等同于账号级或网络级封禁。需要更强防护时，可在 Cloudflare 中为审核路径配置 Access，并为写入接口增加速率限制。
 
 ## 检查命令
 

@@ -40,12 +40,15 @@ test("server-renders the Violet Evergarden tribute", async () => {
 });
 
 test("keeps interaction and accessibility safeguards in place", async () => {
-  const [page, css, contact, letters, admin] = await Promise.all([
+  const [page, css, contact, letters, admin, turnstileWidget, turnstileServer, submitRoute] = await Promise.all([
     readFile(new URL("../app/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
     readFile(new URL("../app/contact/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/letters/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/admin/letters/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../components/turnstile-widget.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../lib/turnstile.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/submit-letter/route.ts", import.meta.url), "utf8"),
   ]);
 
   assert.doesNotMatch(page, /window\.addEventListener\(["']scroll/);
@@ -62,7 +65,13 @@ test("keeps interaction and accessibility safeguards in place", async () => {
   assert.match(letters, /\/api\/submit-letter/);
   assert.match(letters, /\/api\/report-letter/);
   assert.match(letters, /\/api\/like-letter/);
-  assert.match(letters, /violet-pending-letters/);
+  assert.match(letters, /turnstileToken/);
+  assert.doesNotMatch(letters, /SAMPLE_LETTERS|LETTER_API_ENABLED|localStorage|演示/);
+  assert.match(turnstileWidget, /challenges\.cloudflare\.com\/turnstile\/v0\/api\.js\?render=explicit/);
+  assert.match(turnstileWidget, /action:\s*"submit_letter"/);
+  assert.match(turnstileServer, /challenges\.cloudflare\.com\/turnstile\/v0\/siteverify/);
+  assert.match(turnstileServer, /result\.hostname === requestHostname/);
+  assert.match(submitRoute, /verifyTurnstile\(payload\.turnstileToken, request\)/);
   assert.doesNotMatch(`${page}\n${contact}\n${letters}\n${admin}`, /[—–]/);
 });
 

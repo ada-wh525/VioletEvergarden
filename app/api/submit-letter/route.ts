@@ -4,6 +4,7 @@ import { eq } from "drizzle-orm";
 import { bannedVisitors, letters } from "../../../db/schema";
 import { moderateLetter } from "../../../lib/letter-moderation.mjs";
 import { getReaderIdentity } from "../../../lib/letter-visitor";
+import { verifyTurnstile } from "../../../lib/turnstile";
 
 const themes = new Set(["hydrangea", "ivory", "wine"]);
 
@@ -18,6 +19,7 @@ export async function POST(request: Request) {
       author?: string;
       content?: string;
       theme?: string;
+      turnstileToken?: string;
     };
     const content = payload.content?.trim() ?? "";
     const author = payload.author?.trim().slice(0, 24) || "一位未署名的寄信人";
@@ -26,6 +28,19 @@ export async function POST(request: Request) {
     if (!content || content.length > 600) {
       return Response.json({ error: "letter content must contain 1 to 600 characters" }, { status: 400 });
     }
+
+    const verification = await verifyTurnstile(payload.turnstileToken, request);
+    if (!verification.ok) {
+      const unavailable = verification.reason === "unavailable";
+      return Response.json(
+        {
+          code: unavailable ? "verification_unavailable" : "verification_failed",
+          error: unavailable ? "verification service is unavailable" : "verification failed",
+        },
+        { status: unavailable ? 503 : 400 },
+      );
+    }
+
     const moderation = moderateLetter(`${author}\n${content}`);
     if (moderation.hardBlock) {
       return Response.json({ error: "please remove private contact information" }, { status: 400 });

@@ -670,19 +670,24 @@ footer { display: grid; grid-template-columns: 1fr auto; gap: 55px; padding: 70p
 .paper-choice:hover { transform: translateY(-2px); }
 .privacy-check { position: relative; display: grid; grid-template-columns: 17px 1fr; gap: 12px; margin: 28px 0 0 110px; color: rgb(37 51 71 / 59%); font-size: 10px; line-height: 1.65; letter-spacing: .035em; cursor: pointer; }
 .privacy-check input { width: 15px; height: 15px; margin: 1px 0 0; accent-color: var(--exchange-accent); }
-.turnstile-preview { position: relative; min-height: 52px; display: grid; grid-template-columns: 1fr auto; align-content: center; margin: 22px 0 0 110px; padding: 0 16px; border: 1px dashed rgb(37 51 71 / 18%); background: rgb(255 255 255 / 28%); }
-.turnstile-preview > span { color: rgb(37 51 71 / 63%); font-size: 10px; letter-spacing: .08em; }
-.turnstile-preview small { grid-column: 1; margin-top: 4px; color: rgb(37 51 71 / 36%); font-size: 8px; letter-spacing: .03em; }
-.turnstile-preview i { grid-column: 2; grid-row: 1 / span 2; align-self: center; color: var(--exchange-accent); font: normal 700 11px/1 var(--font-serif), serif; letter-spacing: .08em; }
+.turnstile-gate { position: relative; min-height: 72px; margin: 24px 0 0 110px; padding: 13px 15px; border: 1px solid rgb(37 51 71 / 14%); background: rgb(255 255 255 / 34%); }
+.turnstile-widget-host { min-height: 45px; }
+.turnstile-gate > p, .turnstile-error p { margin: 0; color: rgb(37 51 71 / 52%); font-size: 9px; line-height: 1.6; letter-spacing: .045em; }
+.turnstile-gate.is-verified { min-height: 0; padding-block: 9px; border-color: color-mix(in srgb, var(--exchange-accent) 35%, transparent); }
+.turnstile-gate.is-verified .turnstile-widget-host { min-height: 0; }
+.turnstile-gate.is-verified > p { color: var(--exchange-accent); }
+.turnstile-error { display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+.turnstile-error button { flex: 0 0 auto; min-height: 34px; padding: 0 12px; color: var(--ink); border: 1px solid rgb(37 51 71 / 20%); background: transparent; font-size: 9px; letter-spacing: .05em; cursor: pointer; }
 .anonymous-form-footer { position: relative; display: grid; grid-template-columns: 165px 1fr; align-items: center; gap: 22px; margin: 28px 0 0 110px; }
 .anonymous-form-footer button { min-height: 50px; border: 0; color: #fff; background: var(--ink); font-size: 11px; letter-spacing: .1em; cursor: pointer; transition: transform .25s ease, background .25s ease; }
 .anonymous-form-footer button span { margin-right: 9px; color: #d7bd8b; font-size: 14px; }
 .anonymous-form-footer button:hover:not(:disabled) { background: var(--violet-dark); transform: translateY(-2px); }
+.anonymous-form-footer button:active:not(:disabled) { transform: translateY(0) scale(.98); }
 .anonymous-form-footer button:disabled { cursor: wait; opacity: .68; }
 .anonymous-form-footer p { margin: 0; color: rgb(37 51 71 / 42%); font-size: 9px; line-height: 1.6; letter-spacing: .04em; }
 .anonymous-form-footer p.is-error { color: var(--wine); }
 
-.letter-submitted { position: relative; min-height: 650px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 70px; color: var(--ink); text-align: center; background: #f9f4eb; border: 1px solid rgb(37 51 71 / 12%); box-shadow: 0 32px 90px rgb(38 43 50 / 18%); }
+.letter-submitted { position: relative; min-height: 540px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px; color: var(--ink); text-align: center; background: #f9f4eb; border: 1px solid rgb(37 51 71 / 12%); box-shadow: 0 32px 90px rgb(38 43 50 / 18%); }
 .letter-submitted::before { content: ""; position: absolute; inset: 14px; border: 1px solid rgb(174 139 81 / 26%); }
 .submitted-stamp { position: relative; width: 94px; height: 94px; display: grid; place-items: center; margin-bottom: 35px; color: var(--wine); border: 2px solid currentColor; border-radius: 50%; }
 .submitted-stamp::before { content: ""; position: absolute; inset: 7px; border: 1px dashed currentColor; border-radius: 50%; }
@@ -691,9 +696,11 @@ footer { display: grid; grid-template-columns: 1fr auto; gap: 55px; padding: 70p
 .letter-submitted h2 { margin: 0; font: 500 clamp(34px, 3.5vw, 54px)/1.2 var(--font-serif), var(--font-sans-cn), serif; letter-spacing: -.02em; }
 .letter-submitted > span { max-width: 480px; margin-top: 25px; color: rgb(37 51 71 / 58%); font-size: 11px; line-height: 1.8; letter-spacing: .045em; }
 .letter-submitted > div:last-child { display: flex; gap: 12px; margin-top: 38px; }
-.letter-submitted button { min-height: 47px; padding: 0 20px; border: 1px solid rgb(37 51 71 / 18%); background: transparent; font-size: 11px; letter-spacing: .07em; cursor: pointer; }
+.letter-submitted button { min-height: 47px; padding: 0 20px; border: 1px solid rgb(37 51 71 / 18%); background: transparent; font-size: 11px; letter-spacing: .07em; cursor: pointer; transition: transform .2s ease, background .2s ease; }
 .letter-submitted button:last-child { color: #fff; background: var(--ink); border-color: var(--ink); }
 .letter-submitted button b { margin-left: 8px; color: #d7bd8b; }
+.letter-submitted button:hover { transform: translateY(-2px); }
+.letter-submitted button:active { transform: translateY(0) scale(.98); }
 footer.letters-footer { min-height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 30px; padding: 20px 4.5vw; border-top: 1px solid rgb(255 255 255 / 10%); background: #202c3d; color: rgb(255 255 255 / 45%); font: 500 9px/1.4 var(--font-serif), serif; letter-spacing: .17em; }
 .letters-footer div { display: flex; gap: 28px; color: rgb(255 255 255 / 68%); font-family: var(--font-sans-cn), sans-serif; letter-spacing: .08em; }
 .letters-footer a:hover { color: #fff; }
@@ -1043,9 +1050,9 @@ footer.contact-footer { position: absolute; z-index: 2; left: 0; right: 0; botto
   .anonymous-field textarea { min-height: 220px; }
   .paper-choices { grid-template-columns: 1fr; margin-left: 0; }
   .paper-choice { min-height: 58px; }
-  .privacy-check, .turnstile-preview, .anonymous-form-footer { margin-left: 0; }
+  .privacy-check, .turnstile-gate, .anonymous-form-footer { margin-left: 0; }
   .anonymous-form-footer { grid-template-columns: 1fr; }
-  .letter-submitted { min-height: 570px; padding: 55px 28px; }
+  .letter-submitted { min-height: 500px; padding: 48px 28px; }
   .letter-submitted h2 { font-size: 35px; }
   .letter-submitted > div:last-child { align-items: stretch; flex-direction: column; width: 100%; }
   footer.letters-footer { align-items: flex-start; flex-direction: column; padding: 24px 20px; }
