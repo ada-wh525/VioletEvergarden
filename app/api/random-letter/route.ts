@@ -71,7 +71,7 @@ export async function GET() {
         content: letter.content.replace(/\\n/g, "\n"),
         author: letter.author,
         theme: letter.theme,
-        likes: letter.likeCount,
+        likes: typeof letter.likeCount === "number" ? letter.likeCount : 0,
         date: displayDate(letter.createdAt),
       },
     });
