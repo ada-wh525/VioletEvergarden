@@ -45,7 +45,12 @@ export async function GET() {
     }
 
     if (!letter) {
-      await db.insert(letters).values(DEFAULT_LETTERS).onConflictDoNothing();
+      for (const defaultLetter of DEFAULT_LETTERS) {
+        await db
+          .insert(letters)
+          .values(defaultLetter)
+          .onConflictDoNothing({ target: letters.id });
+      }
 
       [letter] = await db
         .select(fields)
@@ -69,7 +74,7 @@ export async function GET() {
       },
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "letter service is unavailable";
-    return Response.json({ error: message }, { status: 503 });
+    console.error("random letter lookup failed", error);
+    return Response.json({ error: "letter service is unavailable" }, { status: 503 });
   }
 }

@@ -79,6 +79,8 @@ test("keeps interaction and accessibility safeguards in place", async () => {
   assert.match(defaultLetters, /archive-06/);
   assert.match(randomRoute, /DEFAULT_LETTERS/);
   assert.match(randomRoute, /onConflictDoNothing/);
+  assert.match(randomRoute, /letter service is unavailable/);
+  assert.doesNotMatch(randomRoute, /error instanceof Error \? error\.message/);
   assert.match(turnstileWidget, /challenges\.cloudflare\.com\/turnstile\/v0\/api\.js\?render=explicit/);
   assert.match(turnstileWidget, /action:\s*"submit_letter"/);
   assert.match(turnstileServer, /challenges\.cloudflare\.com\/turnstile\/v0\/siteverify/);
