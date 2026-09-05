@@ -1,4 +1,4 @@
-import { and, asc, eq, gte } from "drizzle-orm";
+import { and, asc, eq, gte, sql } from "drizzle-orm";
 import { getDb } from "../../../db";
 import { letters } from "../../../db/schema";
 import { DEFAULT_LETTERS } from "../../../lib/default-letters";
@@ -46,10 +46,12 @@ export async function GET() {
 
     if (!letter) {
       for (const defaultLetter of DEFAULT_LETTERS) {
-        await db
-          .insert(letters)
-          .values(defaultLetter)
-          .onConflictDoNothing({ target: letters.id });
+        await db.run(sql`
+          INSERT OR IGNORE INTO letters
+            (id, addressee, content, author, theme, status, random_key)
+          VALUES
+            (${defaultLetter.id}, ${defaultLetter.addressee}, ${defaultLetter.content}, ${defaultLetter.author}, ${defaultLetter.theme}, ${defaultLetter.status}, ${defaultLetter.randomKey})
+        `);
       }
 
       [letter] = await db
