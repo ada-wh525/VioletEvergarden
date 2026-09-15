@@ -69,3 +69,35 @@ npm run build
 node --test tests/rendered-html.test.mjs
 npm run db:generate
 ```
+
+## 人偶打字室（测试功能）
+
+入口：`/typewriter`，首页导航和页脚均有链接。
+
+- **经典信件练习**：三封著名书信主题的原创改写练习稿。底稿为浅灰色，提交后的正确文字为黑色，错误文字为红色并加下划线；全部正确才能寄出。中文输入法组合期间不判色。
+- **空白打字室**：自由书写，支持中文、英文及其他语言、换行、收件称呼和署名，每封信最多 2000 字。
+- 两种模式共用键盘按压、阴影、色带盘、打字杆、回车杆、机械音效和寄信仪式。音效可关闭，减少动态效果的系统偏好会被尊重。
+- 寄信后可下载 PNG。首页与打字室共用 `lib/letter-keepsake.ts`，导出高度随正文增长，不再只保留前 13 行。
+- 信件仅在当前页面处理，不发邮件、不进入公开信池。刷新或离开前需自行下载保存。
+- `lib/typewriter/letters.ts` 中明确区分练习改写与原著／官方译文，可在取得可使用文本后更换。
+
+### 本地查看
+
+```bash
+git switch test/doll-typewriter-practice
+npm ci
+npm run dev
+```
+
+打开 `http://localhost:3000/typewriter`。打字室不需要 D1 数据或 Turnstile，即可练习和导出；其他页面仍沿用原本的运行配置。
+
+```bash
+npm run test:typewriter
+npm test
+```
+
+`test:typewriter` 使用 DOM 环境验证真实 React 事件处理、中文组合输入、错误修正、寄信条件、模式切换和图片导出内容。它不替代真实操作系统输入法、浏览器布局和音频听感测试。
+
+开发修改必须在测试／功能分支进行，禁止未经明确批准向 `main` 推送或合并。详见 `AGENTS.md`。
+
+外观参考：[Underwood 四排键便携机与动画截图的实机对照](https://summivox.wordpress.com/2018/02/07/violet-evergardens-typewriter/)。本实现参考其机身、圆键、双线轴、打字杆和回车杆形态，并为现代键盘及中文输入法做适配；型号对应属于外观考据，不表示官方确认。

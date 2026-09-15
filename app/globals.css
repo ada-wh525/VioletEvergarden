@@ -70,7 +70,7 @@ button { color: inherit; font: inherit; }
   transform: none;
 }
 .brand-name { font: 600 11px/1.15 var(--font-serif), serif; letter-spacing: .17em; }
-.nav-links { justify-self: center; display: flex; align-items: center; gap: clamp(24px, 3vw, 54px); }
+.nav-links { justify-self: center; display: flex; align-items: center; gap: clamp(15px, 1.7vw, 30px); }
 .nav-links a { position: relative; color: rgb(37 51 71 / 68%); font-size: 13px; font-weight: 400; letter-spacing: .13em; transition: color .25s ease; }
 .nav-links a::after { content: ""; position: absolute; left: 0; right: 100%; bottom: -9px; height: 1px; background: var(--gold); transition: right .35s ease; }
 .nav-links a:hover, .nav-links a.active { color: var(--ink); }
