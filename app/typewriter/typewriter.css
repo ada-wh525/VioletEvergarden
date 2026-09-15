@@ -152,3 +152,19 @@
 .tw-letter-meta h2 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 82%; }
 .tw-paper-sign { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 @media (min-width: 761px) and (max-width: 980px) { .tw-workspace { grid-template-columns: 200px minmax(0, 1fr); gap: 18px; }.tw-key { --key-size: 25px; }.tw-key-row { gap: 5px; }.tw-legend { gap: 12px; } }
+
+/* Keep only inputs and controls around the writing surface. */
+.tw-practice-options h2 { font-size: 18px; font-weight: 400; margin: 0 0 18px; }
+.tw-language-switch { display: flex; gap: 8px; }
+.tw-language-switch button { border: 1px solid #c7c6b737; background: transparent; padding: 9px 11px; font-size: 14px; color: #bac4ca; }
+.tw-language-switch button[aria-pressed="true"] { border-color: #c2a575; color: #ead5b0; background: #c2a57512; }
+.tw-settings { margin-top: 26px; }
+.tw-letter-meta { flex-direction: row; min-height: 29px; }
+.tw-letter-meta h2 { max-width: 100%; }
+.tw-room { padding-bottom: 35px; }
+.tw-feedback:empty { min-height: 0; margin-top: 0; }
+@media (max-width: 760px) {
+  .tw-practice-options { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+  .tw-practice-options h2 { margin: 0; }
+  .tw-settings { margin-top: 0; }
+}

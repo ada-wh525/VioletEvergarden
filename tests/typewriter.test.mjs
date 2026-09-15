@@ -89,20 +89,20 @@ await test("composition stays ungraded until committed, mistakes block sending, 
   assert.equal(button("封缄并寄信").disabled, true);
   await act(async () => input.focus());
   await act(async () => input.dispatchEvent(new window.CompositionEvent("compositionstart", { bubbles: true })));
-  await type("jin", { composing: true });
+  await type("nin", { composing: true });
   assert.equal(container.querySelectorAll(".tw-char.correct").length, 0);
   assert.equal(container.querySelectorAll(".tw-char.incorrect").length, 0);
   await act(async () => {
-    setValue(input, "今");
-    input.dispatchEvent(new window.CompositionEvent("compositionend", { bubbles: true, data: "今" }));
+    setValue(input, "您");
+    input.dispatchEvent(new window.CompositionEvent("compositionend", { bubbles: true, data: "您" }));
     input.dispatchEvent(new window.InputEvent("input", { bubbles: true, isComposing: false }));
     await wait(5);
   });
   assert.equal(container.querySelectorAll(".tw-char.correct").length, 1);
-  await type("今夭");
+  await type("您进");
   assert.equal(container.querySelectorAll(".tw-char.incorrect").length, 1);
   assert.equal(button("封缄并寄信").disabled, true);
-  await type("今天");
+  await type("您近");
   assert.equal(container.querySelectorAll(".tw-char.incorrect").length, 0);
   assert.equal(container.querySelectorAll(".tw-char.correct").length, 2);
   await act(async () => input.dispatchEvent(new window.KeyboardEvent("keydown", { bubbles: true, key: "q", code: "KeyQ" })));
@@ -120,8 +120,8 @@ await test("complete practice sends a letter and exposes its image download; cha
   await click("空白打字室");
   assert.ok(container.querySelector("dialog").open);
   await click("继续写这一封");
-  assert.equal(container.querySelector("textarea").value, "今天");
-  await type(PRACTICE_LETTERS[0].body);
+  assert.equal(container.querySelector("textarea").value, "您近");
+  await type(PRACTICE_LETTERS[0].versions.zh.body);
   assert.equal(button("封缄并寄信").disabled, false);
   await click("封缄并寄信");
   assert.equal(container.querySelector("textarea").disabled, true);
@@ -129,7 +129,7 @@ await test("complete practice sends a letter and exposes its image download; cha
   assert.ok(container.querySelector("#practice-receipt"));
   const download = container.querySelector("a[download]");
   assert.match(download?.getAttribute("href") ?? "", /^blob:/);
-  assert.equal(download?.getAttribute("download"), "violet-major.png");
+  assert.equal(download?.getAttribute("download"), "violet-major-zh.png");
 });
 
 await test("blank room accepts multilingual text and newlines, rejects whitespace-only sending, then exports", async () => {
@@ -145,6 +145,47 @@ await test("blank room accepts multilingual text and newlines, rejects whitespac
   await click("封缄并寄信");
   for (let i = 0; i < 4; i++) await act(async () => { await wait(200); });
   assert.equal(container.querySelector("a[download]")?.getAttribute("download"), "violet-free-letter.png");
+});
+
+await test("the single supplied letter switches languages, guards drafts and exports the selected text", async () => {
+  await click("经典信件练习");
+  assert.equal(PRACTICE_LETTERS.length, 1);
+  assert.equal(container.querySelector(".tw-paper-sign").textContent, "薇尔莉特");
+  assert.doesNotMatch(container.textContent, /给初次坐下的你|没有底稿，也没有标准答案|取意于|本站原创练习稿|机械外观参考|让未曾说出口的心意/);
+  await type("您近");
+  await click("日本語");
+  assert.equal(container.querySelector("dialog").open, true);
+  await click("继续写这一封");
+  assert.equal(container.querySelector("textarea").value, "您近");
+  await click("日本語");
+  await click("换新信纸");
+  assert.equal(container.querySelector("textarea").value, "");
+  assert.equal(container.querySelector("textarea").getAttribute("aria-label"), "日文打字练习输入");
+  const input = container.querySelector("textarea");
+  await act(async () => input.dispatchEvent(new window.CompositionEvent("compositionstart", { bubbles: true })));
+  await type("ogenki", { composing: true });
+  assert.equal(container.querySelectorAll(".incorrect").length, 0);
+  await act(async () => {
+    setValue(input, "お元気");
+    input.dispatchEvent(new window.CompositionEvent("compositionend", { bubbles: true, data: "お元気" }));
+  });
+  assert.equal(container.querySelectorAll(".tw-char.correct").length, 3);
+  await type(PRACTICE_LETTERS[0].versions.ja.body);
+  assert.equal(button("封缄并寄信").disabled, false);
+  await click("English");
+  await click("换新信纸");
+  assert.equal(container.querySelector(".tw-letter-meta h2").textContent, "Dear Major Gilbert,");
+  await type("How have you ");
+  assert.equal(container.querySelectorAll(".incorrect").length, 0);
+  assert.equal(button("封缄并寄信").disabled, true);
+  await type(PRACTICE_LETTERS[0].versions.en.body);
+  const start = drawn.length;
+  await click("封缄并寄信");
+  for (let i = 0; i < 4; i++) await act(async () => { await wait(200); });
+  assert.equal(container.querySelector("a[download]").getAttribute("download"), "violet-major-en.png");
+  assert.ok(drawn.slice(start).some((call) => call.text === "Dear Major Gilbert,"));
+  assert.ok(drawn.slice(start).some((call) => call.text === "薇尔莉特"));
+  assert.ok(!drawn.slice(start).some((call) => /本站原创|非小说原文/.test(call.text)));
 });
 
 await test("shared exporter keeps all long-letter lines and the homepage's default salutation", async () => {

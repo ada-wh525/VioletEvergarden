@@ -1,32 +1,29 @@
-export const PRACTICE_LETTERS = [
-  {
-    id: "major",
-    title: "致少佐",
-    subtitle: "关于思念与继续生活",
-    addressee: "亲爱的少佐：",
-    signature: "一位仍在学习表达的人偶",
-    note: "取意于薇尔莉特写给少佐的心意。本站原创练习稿，非小说原文或官方译文。",
-    body: "今天，邮局的窗边落下了温暖的阳光。我又替一位客人写好了信，也比昨天更明白了一点，为什么人们总想把心意交给远方的人。有些话，我仍然要想很久才能写下。可我已经学会认真听见别人的悲伤，也试着照顾自己的心。希望下一次提起您的时候，我能够带着微笑，告诉您这些平凡而珍贵的日子。",
-    motif: "思念",
+export type PracticeLanguage = "zh" | "ja" | "en";
+
+export const PRACTICE_LANGUAGES: { id: PracticeLanguage; label: string; inputLabel: string }[] = [
+  { id: "zh", label: "中文", inputLabel: "中文打字练习输入" },
+  { id: "ja", label: "日本語", inputLabel: "日文打字练习输入" },
+  { id: "en", label: "English", inputLabel: "英文打字练习输入" },
+];
+
+// Chinese/Japanese supplied by the repository owner. Japanese transcription typos
+// are normalized; English is translated from the supplied text, not an official translation.
+export const PRACTICE_LETTERS = [{
+  id: "major",
+  title: "致少佐",
+  signature: "薇尔莉特",
+  versions: {
+    zh: {
+      addressee: "亲爱的吉尔伯特少佐：",
+      body: "您近来一切安好吗？您现在在哪里呢？有没有烦恼呢。无论春夏秋冬，四季轮转，唯独有少佐您的季节却迟迟不来。我起初不懂，不懂少佐您的心意。但是在少佐您赐予我的新的生命中，我稍微能感受到了，通过代笔写信，通过与我邂逅的人。我相信着，少佐您一定在某个地方活着。所以我也要好好地活着，即使不知道前方有什么也要好好活着。如果我们还能相见，我想跟您说：“现在，我已经略略懂得‘爱’为何物了”。",
+    },
+    ja: {
+      addressee: "親愛なるギルベルト少佐",
+      body: "お元気ですか。お変わりないですか。今、どこにいらっしゃいますか。困ったことはありませんか。春も、夏も、秋も、冬も、いくつも季節が過ぎましたが、少佐のいらっしゃる季節だけが巡ってきません。私、最初は分かりませんでした。少佐のお気持ちが、何一つ分かりませんでした。でも、少佐に頂いたこの新しい人生の中で、少しだけですが、感じることが出来るようになったのです。代筆を通して、出会った方たちを通して。私は信じています。少佐がどこかで生きていらっしゃることを。だから私も、生きて、生きて、生きて……。その先に何があるか分からなくても、ただ生きて。そして、また会えたら、こう伝えたいのです。私は、今、「愛してる」も、少しは分かるのです。",
+    },
+    en: {
+      addressee: "Dear Major Gilbert,",
+      body: "How have you been? Where are you now? Is anything troubling you? Spring, summer, autumn, and winter have come and gone, yet the season with you in it never arrives. At first, I did not understand. I understood nothing of your feelings. But in this new life you gave me, I have begun to understand a little, through writing letters for others and through the people I have met. I believe that you are alive somewhere. So I, too, will keep living, even if I do not know what lies ahead. If we can meet again, I want to tell you: I now understand a little of what love means.",
+    },
   },
-  {
-    id: "ann",
-    title: "寄往未来的生日",
-    subtitle: "关于母亲与女儿",
-    addressee: "亲爱的孩子：",
-    signature: "永远惦念你的母亲",
-    note: "取意于母亲留给安的生日信这一故事。本站原创练习稿，非小说原文或官方译文。",
-    body: "当你打开这封信的时候，窗外会是什么季节呢？我想象你已经长高了一些，也遇见了新的朋友。愿你今天吃到喜欢的蛋糕，把蜡烛吹灭以前，认真许下一个属于自己的愿望。往后的日子里，允许自己偶尔难过，也不要错过那些让你笑起来的小事。请把生活过成你喜欢的模样，这就是我最想送给你的生日礼物。",
-    motif: "亲情",
-  },
-  {
-    id: "sisters",
-    title: "寄给远方的姐姐",
-    subtitle: "关于名字与重逢",
-    addressee: "亲爱的姐姐：",
-    signature: "记得你的妹妹",
-    note: "取意于外传中的姐妹书信主题。本站原创练习稿，非小说原文或官方译文。",
-    body: "邮差经过门口的时候，我总会抬起头，猜想今天有没有你的消息。这里的街道已经慢慢熟悉了，我也认识了许多温柔的人。如果能见到你，我想先说说最近学会的事情，再和你一起走一段很长的路。在那一天到来以前，就让这张小小的信纸替我敲响你的门。请记得，无论相隔多远，总有人认真地把你的名字放在心里。",
-    motif: "牵挂",
-  },
-] as const;
+}] as const;

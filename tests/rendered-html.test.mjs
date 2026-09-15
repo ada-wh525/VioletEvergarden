@@ -170,6 +170,9 @@ test("server-renders the typewriter room and both mode controls", async () => {
   assert.match(html, /空白打字室/);
   assert.match(html, /经典信件练习/);
   assert.match(html, /中文打字练习输入/);
-  assert.match(html, /本站原创练习稿/);
+  assert.match(html, /亲爱的吉尔伯特少佐/);
+  assert.match(html, /日本語/);
+  assert.match(html, /English/);
+  assert.doesNotMatch(html, /本站原创练习稿|给初次坐下的你|机械外观参考/);
   assert.match(html, /Underwood/);
 });

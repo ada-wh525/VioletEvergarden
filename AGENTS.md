@@ -4,3 +4,6 @@
 - Keep experimental features local or on their test branch until reviewed. Do not deploy them to production as part of implementation or testing.
 - Preserve existing homepage, letter exchange, moderation, and Cloudflare bindings when adding features.
 - Mark original fan-written practice text accurately. Do not label adaptations as novel text or official translations.
+
+- Keep UI copy minimal: no unsolicited sentimental slogans, explanatory sidebars, or implementation descriptions.
+- Use only owner-provided or approved practice letters; never invent replacement letters.
