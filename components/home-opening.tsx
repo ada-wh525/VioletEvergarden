@@ -72,9 +72,6 @@ export function HomeOpening() {
       if (event.target === event.currentTarget && event.animationName === "home-opening-exit") finish();
     }}>
       <div className="home-opening__light" aria-hidden="true" />
-      <div className="home-opening__desk" aria-hidden="true">
-        <div className="home-opening__tray" />
-      </div>
       <div className="home-opening__stationery" aria-hidden="true">
         <div className="home-opening__back" />
         <div className="home-opening__letter-date">
