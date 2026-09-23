@@ -44,6 +44,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="zh-CN">
       <head>
         <link rel="preload" as="image" href="/violet-hero-clean.webp" fetchPriority="high" />
+        <link rel="preload" as="image" href="/images/antique-letter-opener.webp" fetchPriority="high" />
         <script dangerouslySetInnerHTML={{ __html: `try{if((sessionStorage.getItem("violet-home-opening-viewed")==="1"&&new URLSearchParams(location.search).get("opening")!=="1")||location.hash||matchMedia("(prefers-reduced-motion: reduce)").matches)document.documentElement.classList.add("home-opening-seen")}catch(e){}` }} />
         <noscript><style>{`.home-opening { display: none !important; }`}</style></noscript>
       </head>

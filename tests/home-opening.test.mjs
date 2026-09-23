@@ -32,6 +32,8 @@ let root = createRoot(container);
 test("first visit opens an accessible letter, then skip restores the page and remembers the visit", async () => {
   await act(async () => root.render(createElement(HomeOpening)));
   assert.equal(container.querySelector('[role="dialog"]')?.getAttribute("aria-label"), "启封信件");
+  assert.match(container.querySelector(".home-opening__letter-date time")?.textContent ?? "", /\d{4}[/-]/);
+  assert.equal(container.querySelector(".home-opening__knife img")?.getAttribute("src"), "/images/antique-letter-opener.webp");
   assert.equal(document.activeElement?.textContent?.trim(), "跳过 ↗");
   assert.ok(main.hasAttribute("inert"));
   assert.equal(document.body.style.overflow, "hidden");

@@ -6,9 +6,18 @@ const SESSION_KEY = "violet-home-opening-viewed";
 
 export function HomeOpening() {
   const [visible, setVisible] = useState(true);
+  const [now, setNow] = useState<Date | null>(null);
   const finished = useRef(false);
   const releasePage = useRef<(() => void) | null>(null);
   const skipButton = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!visible) return;
+    const updateClock = () => setNow(new Date());
+    updateClock();
+    const timer = window.setInterval(updateClock, 1000);
+    return () => window.clearInterval(timer);
+  }, [visible]);
 
   const finish = useCallback((focusHeading = false) => {
     if (finished.current) return;
@@ -48,7 +57,7 @@ export function HomeOpening() {
     };
 
     // Always reveal the page if an animation is interrupted or unsupported.
-    const fallback = window.setTimeout(() => finish(), 3200);
+    const fallback = window.setTimeout(() => finish(), 8200);
     return () => {
       window.clearTimeout(fallback);
       releasePage.current?.();
@@ -65,6 +74,13 @@ export function HomeOpening() {
       <div className="home-opening__light" aria-hidden="true" />
       <div className="home-opening__stationery" aria-hidden="true">
         <div className="home-opening__back" />
+        <div className="home-opening__letter-date">
+          <span>CH POSTAL</span>
+          <time>
+            {now ? new Intl.DateTimeFormat("zh-CN", { year: "numeric", month: "2-digit", day: "2-digit", weekday: "short" }).format(now) : "----年--月--日"}
+            <b>{now ? new Intl.DateTimeFormat("zh-CN", { hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false }).format(now) : "--:--:--"}</b>
+          </time>
+        </div>
         <div className="home-opening__paper">
           <span className="home-opening__paper-mark">C. H. POSTAL</span>
           <span className="home-opening__paper-rule" />
@@ -73,7 +89,13 @@ export function HomeOpening() {
         </div>
         <div className="home-opening__fold" />
         <div className="home-opening__front" />
-        <div className="home-opening__stamp">V</div>
+        <div className="home-opening__cut-line" />
+        <div className="home-opening__stamp">CH</div>
+        <div className="home-opening__knife">
+          {/* Native image keeps the isolated cutout eager and independently animated. */}
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/images/antique-letter-opener.webp" alt="" draggable="false" fetchPriority="high" />
+        </div>
       </div>
       <div className="home-opening__unfold" aria-hidden="true" />
       <button ref={skipButton} className="home-opening__skip" type="button" onClick={() => finish(true)}>跳过 <span aria-hidden="true">↗</span></button>
