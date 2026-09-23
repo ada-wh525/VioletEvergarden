@@ -57,7 +57,7 @@ export function HomeOpening() {
     };
 
     // Always reveal the page if an animation is interrupted or unsupported.
-    const fallback = window.setTimeout(() => finish(), 8200);
+    const fallback = window.setTimeout(() => finish(), 11200);
     return () => {
       window.clearTimeout(fallback);
       releasePage.current?.();
@@ -72,6 +72,10 @@ export function HomeOpening() {
       if (event.target === event.currentTarget && event.animationName === "home-opening-exit") finish();
     }}>
       <div className="home-opening__light" aria-hidden="true" />
+      <div className="home-opening__drawer" aria-hidden="true">
+        <div className="home-opening__drawer-liner" />
+        <div className="home-opening__drawer-front"><span /></div>
+      </div>
       <div className="home-opening__stationery" aria-hidden="true">
         <div className="home-opening__back" />
         <div className="home-opening__letter-date">
