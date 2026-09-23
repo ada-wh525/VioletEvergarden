@@ -3,6 +3,8 @@
 import { type CSSProperties, useEffect, useRef, useState } from "react";
 import { createLetterKeepsake } from "../lib/letter-keepsake";
 import { LetterDeliveryFlight, type LetterDeliveryState } from "../components/letter-delivery-flight";
+import { HomeOpening } from "../components/home-opening";
+import "./home-opening.css";
 
 const profile = [
   { label: "日文名", value: "ヴァイオレット・エヴァーガーデン" },
@@ -317,6 +319,8 @@ export default function Home() {
   };
 
   return (
+    <>
+    <HomeOpening />
     <main>
       <div className="top-sentinel" ref={topSentinelRef} aria-hidden="true" />
       <div className="reading-progress" aria-hidden="true" />
@@ -359,7 +363,7 @@ export default function Home() {
         <div className="hero-paper" aria-hidden="true" />
         <div className="hero-copy">
           <div className="eyebrow"><span>致 未曾谋面的你</span><i /></div>
-          <h1 lang="zh-CN">
+          <h1 lang="zh-CN" tabIndex={-1}>
             <span className="script-word">薇尔莉特</span>
             <span className="serif-word">伊芙加登</span>
           </h1>
@@ -671,5 +675,6 @@ export default function Home() {
       <div className={`toast ${toast ? "is-visible" : ""}`} role="status" aria-live="polite">{toast}</div>
       <a className={`back-top ${scrolled ? "is-visible" : ""}`} href="#top" aria-label="返回页面顶部">↑</a>
     </main>
+    </>
   );
 }
