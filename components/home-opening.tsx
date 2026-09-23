@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 const SESSION_KEY = "violet-home-opening-viewed";
-const tornEdge = Array.from({ length: 76 }, (_, index) => `${index ? "L" : "M"} ${index * 8} ${index % 2 ? 11 : 5}`).join(" ");
 
 export function HomeOpening() {
   const [visible, setVisible] = useState(true);
@@ -93,9 +92,6 @@ export function HomeOpening() {
         </div>
         <div className="home-opening__fold" />
         <div className="home-opening__front" />
-        <svg className="home-opening__cut-line" viewBox="0 0 600 18" preserveAspectRatio="none" focusable="false">
-          <path d={tornEdge} pathLength="100" />
-        </svg>
         <div className="home-opening__stamp">CH</div>
         <div className="home-opening__knife">
           {/* Native image keeps the isolated cutout eager and independently animated. */}

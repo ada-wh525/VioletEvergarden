@@ -179,28 +179,6 @@
   filter: drop-shadow(0 5px 4px rgb(70 52 41 / 20%));
   animation: home-opening-flap var(--opening-time) cubic-bezier(.3, .65, .25, 1) both;
 }
-.home-opening__cut-line {
-  position: absolute;
-  z-index: 5;
-  top: 4.5%;
-  left: 7%;
-  width: 86%;
-  height: clamp(12px, 1.6vw, 18px);
-  overflow: visible;
-  opacity: 0;
-  filter: drop-shadow(0 1px 0 rgb(255 247 224 / 72%));
-  animation: home-opening-cut-show var(--opening-time) linear both;
-}
-.home-opening__cut-line path {
-  fill: none;
-  stroke: #69594a;
-  stroke-width: 2.5px;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-dasharray: 100;
-  stroke-dashoffset: 100;
-  animation: home-opening-tear var(--opening-time) steps(42, end) both;
-}
 .home-opening__stamp {
   position: absolute;
   z-index: 6;
@@ -320,15 +298,6 @@
 @keyframes home-opening-flap {
   0%, 56% { transform: rotateX(0); }
   65%, 100% { transform: rotateX(180deg); }
-}
-@keyframes home-opening-cut-show {
-  0%, 29% { opacity: 0; }
-  31%, 63% { opacity: 1; }
-  70%, 100% { opacity: 0; }
-}
-@keyframes home-opening-tear {
-  0%, 30% { stroke-dashoffset: 100; }
-  55%, 100% { stroke-dashoffset: 0; }
 }
 @keyframes home-opening-knife {
   0%, 29% { opacity: 0; transform: translateX(-4%); }
