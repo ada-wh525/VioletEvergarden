@@ -1,5 +1,5 @@
 .home-opening {
-  --opening-time: 10.4s;
+  --opening-time: 15.2s;
   position: fixed;
   inset: 0;
   z-index: 120;
@@ -30,53 +30,47 @@
   background: radial-gradient(circle, rgb(241 231 211 / 19%), transparent 68%);
   animation: home-opening-light var(--opening-time) ease both;
 }
-.home-opening__drawer {
+.home-opening__desk {
   position: absolute;
   z-index: 1;
   left: 50%;
   top: 67%;
-  width: min(86vw, 760px);
-  aspect-ratio: 1.42;
-  padding: clamp(9px, 1.6vw, 16px);
-  transform: translate(-50%, -43%) scale(.86);
-  border: 1px solid rgb(230 205 162 / 40%);
-  background: linear-gradient(145deg, #76583e, #3f3026 52%, #634a35);
-  box-shadow: 0 34px 58px rgb(5 9 15 / 50%), inset 0 0 0 3px rgb(255 226 177 / 9%), inset 0 0 0 7px rgb(15 20 25 / 34%);
+  width: min(84vw, 740px);
+  aspect-ratio: 1.52;
+  padding: clamp(9px, 1.5vw, 14px);
+  transform: translate(-50%, -48%) scale(.93);
+  border: 1px solid rgb(207 180 131 / 43%);
+  border-radius: 7px;
+  background: linear-gradient(145deg, #334458, #172635 60%, #2c3b4b);
+  box-shadow: 0 34px 58px rgb(5 9 15 / 48%), inset 0 0 0 3px rgb(255 224 166 / 7%);
   opacity: 0;
-  animation: home-opening-drawer-arrive var(--opening-time) cubic-bezier(.2, .7, .2, 1) both;
+  animation: home-opening-desk-arrive var(--opening-time) cubic-bezier(.2, .7, .2, 1) both;
 }
-.home-opening__drawer-liner {
+.home-opening__tray {
   position: absolute;
-  inset: 4.5% 4.5% 5%;
+  inset: 3.5%;
   overflow: hidden;
-  border: 1px solid rgb(208 188 148 / 28%);
+  border: 1px solid rgb(207 184 141 / 30%);
+  border-radius: 3px;
   background:
-    repeating-linear-gradient(135deg, transparent 0 7px, rgb(233 221 196 / 2%) 8px, transparent 9px),
-    radial-gradient(ellipse at 50% 45%, #46493d, #242c2a 79%);
-  box-shadow: inset 0 12px 24px rgb(5 8 9 / 30%), inset 0 0 0 5px rgb(10 17 16 / 26%);
+    repeating-linear-gradient(135deg, transparent 0 7px, rgb(233 221 196 / 1.5%) 8px, transparent 9px),
+    radial-gradient(ellipse at 50% 45%, #344657, #1d2e3e 79%);
+  box-shadow: inset 0 10px 24px rgb(6 13 21 / 36%), inset 0 0 0 5px rgb(7 18 30 / 23%);
 }
-.home-opening__drawer-front {
+.home-opening__tray::before {
+  content: "";
   position: absolute;
-  z-index: 2;
-  left: 1.5%;
-  right: 1.5%;
-  bottom: -2%;
-  height: 22%;
-  display: grid;
-  place-items: center;
-  border: 1px solid rgb(237 207 165 / 48%);
-  background: linear-gradient(180deg, #806143, #62472f 40%, #392b23);
-  box-shadow: 0 13px 18px rgb(5 8 12 / 36%), inset 0 1px 0 rgb(255 232 193 / 18%);
-  transform-origin: center top;
-  animation: home-opening-drawer-front var(--opening-time) cubic-bezier(.22, .75, .24, 1) both;
+  inset: 8px;
+  border: 1px solid rgb(206 184 143 / 17%);
 }
-.home-opening__drawer-front span {
-  width: clamp(40px, 8vw, 78px);
-  height: 6px;
-  border: 1px solid rgb(255 230 187 / 65%);
-  border-radius: 999px;
-  background: linear-gradient(180deg, #c8a66e, #80613a);
-  box-shadow: 0 2px 3px rgb(13 12 10 / 38%), inset 0 1px 0 rgb(255 241 211 / 48%);
+.home-opening__tray::after {
+  content: "";
+  position: absolute;
+  bottom: 7%;
+  left: 43%;
+  width: 14%;
+  height: 1px;
+  background: rgb(194 168 119 / 43%);
 }
 .home-opening__stationery {
   position: absolute;
@@ -110,7 +104,7 @@
 }
 .home-opening__letter-date {
   position: absolute;
-  z-index: 1;
+  z-index: 4;
   top: 10%;
   right: 7%;
   left: 7%;
@@ -157,9 +151,10 @@
 }
 .home-opening__paper-rule { align-self: stretch; height: 1px; margin: 7% 0 10%; background: rgb(73 72 73 / 18%); }
 .home-opening__paper-title {
-  font: 500 clamp(24px, 4vw, 44px)/.92 var(--font-serif), Georgia, serif;
-  letter-spacing: .03em;
+  font: 500 clamp(21px, 3.4vw, 36px)/1.3 "Songti SC", "SimSun", serif;
+  letter-spacing: .06em;
   text-align: center;
+  white-space: nowrap;
 }
 .home-opening__paper-line { width: 31%; height: 1px; margin-top: 9%; background: #a8875d; }
 .home-opening__front {
@@ -186,22 +181,29 @@
 }
 .home-opening__cut-line {
   position: absolute;
-  z-index: 4;
-  top: 20%;
-  left: 14%;
-  width: 73%;
-  height: 2px;
-  transform: rotate(-31deg);
-  transform-origin: left center;
+  z-index: 5;
+  top: 4.5%;
+  left: 7%;
+  width: 86%;
+  height: clamp(12px, 1.6vw, 18px);
+  overflow: visible;
   opacity: 0;
-  background: linear-gradient(90deg, transparent, #fff8e6 12%, #fff 50%, #c3a778 100%);
-  box-shadow: 0 0 9px rgb(255 249 229 / 83%);
-  clip-path: inset(0 100% 0 0);
-  animation: home-opening-cut var(--opening-time) ease both;
+  filter: drop-shadow(0 1px 0 rgb(255 247 224 / 72%));
+  animation: home-opening-cut-show var(--opening-time) linear both;
+}
+.home-opening__cut-line path {
+  fill: none;
+  stroke: #69594a;
+  stroke-width: 2.5px;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: home-opening-tear var(--opening-time) steps(42, end) both;
 }
 .home-opening__stamp {
   position: absolute;
-  z-index: 5;
+  z-index: 6;
   top: 47%;
   left: 50%;
   width: clamp(36px, 6.5vw, 58px);
@@ -220,9 +222,9 @@
 }
 .home-opening__knife {
   position: absolute;
-  z-index: 6;
-  top: -1%;
-  left: -29%;
+  z-index: 7;
+  top: 4%;
+  left: -68%;
   width: 76%;
   pointer-events: none;
   opacity: 0;
@@ -235,7 +237,7 @@
 .home-opening__unfold {
   position: absolute;
   z-index: 7;
-  inset: 36% 18%;
+  inset: 38% 33%;
   opacity: 0;
   border: 1px solid rgb(87 73 58 / 17%);
   background:
@@ -250,6 +252,35 @@
   position: absolute;
   inset: clamp(7px, 1.7vw, 20px);
   border: 1px solid rgb(151 129 95 / 19%);
+}
+.home-opening__unfold-inner {
+  position: absolute;
+  inset: clamp(18px, 5vw, 82px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(16px, 3vw, 34px);
+  color: #354052;
+  text-align: center;
+  opacity: 0;
+  animation: home-opening-name var(--opening-time) ease both;
+}
+.home-opening__unfold-inner span {
+  color: #88765e;
+  font: 600 clamp(10px, 1vw, 13px)/1 var(--font-serif), Georgia, serif;
+  letter-spacing: .3em;
+}
+.home-opening__unfold-inner strong {
+  font: 500 clamp(26px, 4.5vw, 56px)/1.35 "Songti SC", "SimSun", serif;
+  letter-spacing: .08em;
+  white-space: nowrap;
+}
+.home-opening__unfold-inner::after {
+  content: "";
+  width: clamp(48px, 7vw, 76px);
+  height: 1px;
+  background: #b0946d;
 }
 .home-opening__skip {
   position: absolute;
@@ -269,57 +300,61 @@
 }
 .home-opening__skip span { margin-left: 8px; }
 @keyframes home-opening-lift {
-  0%, 7% { opacity: 0; transform: translate(-50%, -38%) rotate(-4deg) scale(.8); }
-  14% { opacity: 1; transform: translate(-50%, -50%) rotate(-1deg) scale(1); }
-  22% { opacity: 1; transform: translate(-50%, -50%) rotate(0) scale(1.02); }
-  34%, 72% { opacity: 1; transform: translate(-50%, calc(-50% - 18vh)) rotate(0) scale(1.025); }
-  82% { opacity: 0; transform: translate(-50%, calc(-50% - 20vh)) scale(1.02); }
+  0%, 5% { opacity: 0; transform: translate(-50%, -40%) rotate(-2deg) scale(.92); }
+  12% { opacity: 1; transform: translate(-50%, -50%) rotate(0) scale(1); }
+  19% { opacity: 1; transform: translate(-50%, -50%) rotate(0) scale(1); }
+  28%, 76% { opacity: 1; transform: translate(-50%, calc(-50% - 18vh)) rotate(0) scale(1.025); }
+  83% { opacity: 0; transform: translate(-50%, calc(-50% - 19vh)) scale(1.02); }
   100% { opacity: 0; transform: translate(-50%, 0) scale(.76); }
 }
-@keyframes home-opening-drawer-arrive {
-  0%, 2% { opacity: 0; transform: translate(-50%, -34%) scale(.82); }
-  10%, 73% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-  83%, 100% { opacity: 0; transform: translate(-50%, -44%) scale(1.04); }
-}
-@keyframes home-opening-drawer-front {
-  0%, 8% { transform: translateY(0) scale(1); }
-  20%, 72% { transform: translateY(124%) scale(1.025); }
-  84%, 100% { transform: translateY(150%) scale(1.04); }
+@keyframes home-opening-desk-arrive {
+  0%, 2% { opacity: 0; transform: translate(-50%, -46%) scale(.92); }
+  9%, 76% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  85%, 100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
 }
 @keyframes home-opening-date {
-  0%, 25% { opacity: 0; transform: translateY(5px); }
-  32%, 65% { opacity: .88; transform: translateY(0); }
-  77%, 100% { opacity: 0; }
+  0%, 20% { opacity: 0; transform: translateY(5px); }
+  26%, 66% { opacity: .88; transform: translateY(0); }
+  76%, 100% { opacity: 0; }
 }
 @keyframes home-opening-flap {
-  0%, 61% { transform: rotateX(0); }
-  70%, 100% { transform: rotateX(180deg); }
+  0%, 56% { transform: rotateX(0); }
+  65%, 100% { transform: rotateX(180deg); }
 }
-@keyframes home-opening-cut {
-  0%, 36% { opacity: 0; clip-path: inset(0 100% 0 0); }
-  40% { opacity: 1; clip-path: inset(0 100% 0 0); }
-  62% { opacity: 1; clip-path: inset(0 0 0 0); }
-  68%, 100% { opacity: 0; clip-path: inset(0 0 0 0); }
+@keyframes home-opening-cut-show {
+  0%, 29% { opacity: 0; }
+  31%, 63% { opacity: 1; }
+  70%, 100% { opacity: 0; }
+}
+@keyframes home-opening-tear {
+  0%, 30% { stroke-dashoffset: 100; }
+  55%, 100% { stroke-dashoffset: 0; }
 }
 @keyframes home-opening-knife {
-  0%, 37% { opacity: 0; transform: translateX(-8%) rotate(-1deg); }
-  41% { opacity: 1; transform: translateX(-8%) rotate(-1deg); }
-  63% { opacity: 1; transform: translateX(99%) rotate(-1deg); }
-  68%, 100% { opacity: 0; transform: translateX(105%) rotate(2deg); }
+  0%, 29% { opacity: 0; transform: translateX(-4%); }
+  31% { opacity: 1; transform: translateX(-4%); }
+  55% { opacity: 1; transform: translateX(118%); }
+  60%, 100% { opacity: 0; transform: translateX(123%); }
 }
 @keyframes home-opening-seal {
-  0%, 59% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-  65% { opacity: .75; transform: translate(-50%, -50%) scale(.8) rotate(-12deg); }
-  71%, 100% { opacity: 0; transform: translate(-50%, -90%) scale(.55) rotate(18deg); }
+  0%, 55% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  61% { opacity: .75; transform: translate(-50%, -50%) scale(.8) rotate(-12deg); }
+  67%, 100% { opacity: 0; transform: translate(-50%, -90%) scale(.55) rotate(18deg); }
 }
 @keyframes home-opening-letter {
-  0%, 68% { transform: translateY(27%); }
-  81%, 100% { transform: translateY(-48%); }
+  0%, 64% { transform: translateY(27%); }
+  74%, 100% { transform: translateY(-48%); }
 }
 @keyframes home-opening-unfold {
-  0%, 80% { opacity: 0; inset: 36% 18%; }
-  84% { opacity: 1; inset: 36% 18%; }
-  97%, 100% { opacity: 1; inset: -3%; }
+  0%, 73% { opacity: 0; inset: 38% 33%; }
+  75% { opacity: 1; inset: 38% 33%; }
+  79% { opacity: 1; inset: 22% 18%; }
+  83%, 100% { opacity: 1; inset: -3%; }
+}
+@keyframes home-opening-name {
+  0%, 80% { opacity: 0; transform: translateY(9px); }
+  85%, 96% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(0); }
 }
 @keyframes home-opening-light {
   0% { opacity: 0; transform: translate(-50%, -50%) scale(.7); }
@@ -327,8 +362,8 @@
   100% { opacity: 0; transform: translate(-50%, -50%) scale(1.3); }
 }
 @keyframes home-opening-skip {
-  0%, 91% { opacity: 1; }
-  98%, 100% { opacity: 0; }
+  0%, 96% { opacity: 1; }
+  100% { opacity: 0; }
 }
 @keyframes home-opening-exit {
   0%, 96% { opacity: 1; }
@@ -337,9 +372,10 @@
 html.home-opening-seen .home-opening { display: none; }
 @media (max-width: 640px) {
   .home-opening__stationery { width: min(86vw, 430px); top: 67%; }
-  .home-opening__drawer { width: 92vw; top: 67%; }
-  .home-opening__paper-title { font-size: clamp(23px, 7vw, 32px); }
-  .home-opening__knife { top: 4%; left: -34%; width: 86%; }
+  .home-opening__desk { width: 92vw; top: 67%; }
+  .home-opening__paper-title { font-size: clamp(20px, 5.5vw, 27px); }
+  .home-opening__knife { top: 4%; left: -76%; width: 86%; }
+  .home-opening__unfold-inner strong { font-size: clamp(25px, 6vw, 38px); letter-spacing: .02em; }
   .home-opening__skip { top: max(20px, env(safe-area-inset-top)); right: max(20px, env(safe-area-inset-right)); }
 }
 @media (prefers-reduced-motion: reduce) {

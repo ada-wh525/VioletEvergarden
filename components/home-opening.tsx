@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 const SESSION_KEY = "violet-home-opening-viewed";
+const tornEdge = Array.from({ length: 76 }, (_, index) => `${index ? "L" : "M"} ${index * 8} ${index % 2 ? 11 : 5}`).join(" ");
 
 export function HomeOpening() {
   const [visible, setVisible] = useState(true);
@@ -57,7 +58,7 @@ export function HomeOpening() {
     };
 
     // Always reveal the page if an animation is interrupted or unsupported.
-    const fallback = window.setTimeout(() => finish(), 11200);
+    const fallback = window.setTimeout(() => finish(), 15800);
     return () => {
       window.clearTimeout(fallback);
       releasePage.current?.();
@@ -72,9 +73,8 @@ export function HomeOpening() {
       if (event.target === event.currentTarget && event.animationName === "home-opening-exit") finish();
     }}>
       <div className="home-opening__light" aria-hidden="true" />
-      <div className="home-opening__drawer" aria-hidden="true">
-        <div className="home-opening__drawer-liner" />
-        <div className="home-opening__drawer-front"><span /></div>
+      <div className="home-opening__desk" aria-hidden="true">
+        <div className="home-opening__tray" />
       </div>
       <div className="home-opening__stationery" aria-hidden="true">
         <div className="home-opening__back" />
@@ -88,12 +88,14 @@ export function HomeOpening() {
         <div className="home-opening__paper">
           <span className="home-opening__paper-mark">C. H. POSTAL</span>
           <span className="home-opening__paper-rule" />
-          <span className="home-opening__paper-title">Violet<br />Evergarden</span>
+          <span className="home-opening__paper-title">薇尔莉特·伊芙加登</span>
           <span className="home-opening__paper-line" />
         </div>
         <div className="home-opening__fold" />
         <div className="home-opening__front" />
-        <div className="home-opening__cut-line" />
+        <svg className="home-opening__cut-line" viewBox="0 0 600 18" preserveAspectRatio="none" focusable="false">
+          <path d={tornEdge} pathLength="100" />
+        </svg>
         <div className="home-opening__stamp">CH</div>
         <div className="home-opening__knife">
           {/* Native image keeps the isolated cutout eager and independently animated. */}
@@ -101,7 +103,12 @@ export function HomeOpening() {
           <img src="/images/antique-letter-opener.webp" alt="" draggable="false" fetchPriority="high" />
         </div>
       </div>
-      <div className="home-opening__unfold" aria-hidden="true" />
+      <div className="home-opening__unfold" aria-hidden="true">
+        <div className="home-opening__unfold-inner">
+          <span>C. H. POSTAL</span>
+          <strong>薇尔莉特·伊芙加登</strong>
+        </div>
+      </div>
       <button ref={skipButton} className="home-opening__skip" type="button" onClick={() => finish(true)}>跳过 <span aria-hidden="true">↗</span></button>
     </div>
   );
