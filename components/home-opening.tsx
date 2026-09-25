@@ -57,7 +57,7 @@ export function HomeOpening() {
     };
 
     // Always reveal the page if an animation is interrupted or unsupported.
-    const fallback = window.setTimeout(() => finish(), 15800);
+    const fallback = window.setTimeout(() => finish(), 17700);
     return () => {
       window.clearTimeout(fallback);
       releasePage.current?.();
@@ -71,6 +71,8 @@ export function HomeOpening() {
     <div className="home-opening" role="dialog" aria-modal="true" aria-label="启封信件" onAnimationEnd={(event) => {
       if (event.target === event.currentTarget && event.animationName === "home-opening-exit") finish();
     }}>
+      <div className="home-opening__lake" aria-hidden="true" />
+      <div className="home-opening__flying-letter" aria-hidden="true" />
       <div className="home-opening__light" aria-hidden="true" />
       <div className="home-opening__stationery" aria-hidden="true">
         <div className="home-opening__back" />

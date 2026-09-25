@@ -1,5 +1,5 @@
 .home-opening {
-  --opening-time: 15.2s;
+  --opening-time: 17s;
   position: fixed;
   inset: 0;
   z-index: 120;
@@ -15,6 +15,7 @@
   inset: -3%;
   pointer-events: none;
   background: url("/images/postal-writing-desk.webp") center / cover no-repeat;
+  filter: brightness(1.42) saturate(.92);
   animation: home-opening-room var(--opening-time) ease-out both;
 }
 .home-opening::after {
@@ -23,7 +24,50 @@
   z-index: 1;
   inset: 0;
   pointer-events: none;
-  background: radial-gradient(ellipse at 51% 48%, transparent 38%, rgb(7 13 21 / 35%) 100%);
+  background: radial-gradient(ellipse at 51% 48%, transparent 45%, rgb(7 13 21 / 19%) 100%);
+}
+.home-opening__lake {
+  position: absolute;
+  z-index: 2;
+  inset: -2%;
+  pointer-events: none;
+  background: #295574 url("https://media1.tenor.com/m/LcPBDbARDnEAAAAd/violet-evergarden-violet.gif") center / cover no-repeat;
+  box-shadow: 12px 0 42px rgb(17 30 42 / 20%);
+  animation: home-opening-lake var(--opening-time) cubic-bezier(.55, .02, .3, 1) both;
+}
+.home-opening__flying-letter {
+  position: absolute;
+  z-index: 4;
+  top: 34%;
+  left: 66%;
+  width: min(44vw, 420px);
+  aspect-ratio: 1.58;
+  pointer-events: none;
+  opacity: 0;
+  border: 1px solid #f8edda;
+  background: linear-gradient(145deg, #fffaf0 0%, #e4d3b7 100%);
+  box-shadow: 0 12px 28px rgb(17 28 39 / 28%);
+  animation: home-opening-flight var(--opening-time) cubic-bezier(.4, .08, .25, 1) both;
+}
+.home-opening__flying-letter::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(155deg, #fffaf0, #e4d2b6);
+  clip-path: polygon(0 0, 100% 0, 50% 56%);
+  filter: drop-shadow(0 3px 2px rgb(61 48 33 / 17%));
+}
+.home-opening__flying-letter::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 10%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #87434d;
+  transform: translate(-50%, -50%);
+  box-shadow: inset 0 0 0 3px rgb(255 215 175 / 25%);
 }
 .home-opening__light {
   position: absolute;
@@ -45,7 +89,7 @@
   aspect-ratio: 1.58;
   transform: translate(-50%, -50%);
   perspective: 1100px;
-  z-index: 2;
+  z-index: 3;
   filter: drop-shadow(0 26px 20px rgb(4 9 17 / 52%));
   animation: home-opening-lift var(--opening-time) cubic-bezier(.2, .7, .2, 1) both;
 }
@@ -252,56 +296,69 @@
 }
 .home-opening__skip span { margin-left: 8px; }
 @keyframes home-opening-lift {
-  0%, 5% { opacity: 0; transform: translate(-50%, -40%) rotate(-2deg) scale(.92); }
-  12% { opacity: 1; transform: translate(-50%, -50%) rotate(0) scale(1); }
-  19% { opacity: 1; transform: translate(-50%, -50%) rotate(0) scale(1); }
-  28%, 76% { opacity: 1; transform: translate(-50%, calc(-50% - 10vh)) rotate(0) scale(1.025); }
-  83% { opacity: 0; transform: translate(-50%, calc(-50% - 11vh)) scale(1.02); }
+  0%, 30% { opacity: 0; transform: translate(-50%, -60%) rotate(-5deg) scale(.83); }
+  35% { opacity: 1; transform: translate(-50%, -50%) rotate(0) scale(1); }
+  39% { opacity: 1; transform: translate(-50%, -50%) rotate(0) scale(1); }
+  47%, 79% { opacity: 1; transform: translate(-50%, calc(-50% - 10vh)) rotate(0) scale(1.025); }
+  85% { opacity: 0; transform: translate(-50%, calc(-50% - 11vh)) scale(1.02); }
   100% { opacity: 0; transform: translate(-50%, 0) scale(.76); }
 }
+@keyframes home-opening-lake {
+  0%, 15% { opacity: 1; transform: translateX(0) scale(1.04); }
+  30% { opacity: 1; transform: translateX(-105%) scale(1.04); }
+  31%, 100% { opacity: 0; transform: translateX(-105%) scale(1.04); }
+}
+@keyframes home-opening-flight {
+  0%, 16% { opacity: 0; transform: translate(-50%, -50%) rotate(-20deg) scale(.16); }
+  18% { opacity: 1; transform: translate(-50%, -50%) rotate(-20deg) scale(.21); }
+  22% { opacity: 1; transform: translate(calc(-50% - 11vw), calc(-50% - 12vh)) rotate(17deg) scale(.38); }
+  26% { opacity: 1; transform: translate(calc(-50% - 29vw), calc(-50% + 7vh)) rotate(135deg) scale(.66); }
+  30% { opacity: 1; transform: translate(calc(-50% - 16vw), calc(-50% + 18vh)) rotate(318deg) scale(1.02); }
+  34%, 100% { opacity: 0; transform: translate(calc(-50% - 16vw), calc(-50% + 25vh)) rotate(360deg) scale(1.24); }
+}
 @keyframes home-opening-room {
-  0% { opacity: .75; transform: scale(1.055); }
-  28%, 72% { opacity: 1; transform: scale(1); }
+  0% { opacity: 1; transform: scale(1.045); }
+  32%, 72% { opacity: 1; transform: scale(1); }
   100% { opacity: 1; transform: scale(1.015); }
 }
 @keyframes home-opening-date {
-  0%, 20% { opacity: 0; transform: translateY(5px); }
-  26%, 66% { opacity: .88; transform: translateY(0); }
-  76%, 100% { opacity: 0; }
+  0%, 34% { opacity: 0; transform: translateY(5px); }
+  39%, 69% { opacity: .88; transform: translateY(0); }
+  78%, 100% { opacity: 0; }
 }
 @keyframes home-opening-flap {
-  0%, 56% { transform: rotateX(0); }
-  65%, 100% { transform: rotateX(180deg); }
+  0%, 63% { transform: rotateX(0); }
+  70%, 100% { transform: rotateX(180deg); }
 }
 @keyframes home-opening-knife {
-  0%, 29% { opacity: 0; transform: translate(-5%, 12%) rotate(-5deg); }
-  32% { opacity: 1; transform: translate(0, 0) rotate(-2deg); }
-  55% { opacity: 1; transform: translateX(var(--knife-distance)) rotate(0); }
-  60%, 100% { opacity: 0; transform: translateX(var(--knife-distance)) translateY(-9%) rotate(5deg); }
+  0%, 43% { opacity: 0; transform: translate(-5%, 12%) rotate(-5deg); }
+  46% { opacity: 1; transform: translate(0, 0) rotate(-2deg); }
+  62% { opacity: 1; transform: translateX(var(--knife-distance)) rotate(0); }
+  67%, 100% { opacity: 0; transform: translateX(var(--knife-distance)) translateY(-9%) rotate(5deg); }
 }
 @keyframes home-opening-seal {
-  0%, 55% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-  61% { opacity: .75; transform: translate(-50%, -50%) scale(.8) rotate(-12deg); }
-  67%, 100% { opacity: 0; transform: translate(-50%, -90%) scale(.55) rotate(18deg); }
+  0%, 63% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  68% { opacity: .75; transform: translate(-50%, -50%) scale(.8) rotate(-12deg); }
+  73%, 100% { opacity: 0; transform: translate(-50%, -90%) scale(.55) rotate(18deg); }
 }
 @keyframes home-opening-letter {
-  0%, 64% { transform: translateY(27%); }
-  74%, 100% { transform: translateY(-48%); }
+  0%, 69% { transform: translateY(27%); }
+  78%, 100% { transform: translateY(-48%); }
 }
 @keyframes home-opening-unfold {
-  0%, 73% { opacity: 0; inset: 38% 33%; }
-  75% { opacity: 1; inset: 38% 33%; }
-  79% { opacity: 1; inset: 22% 18%; }
-  83%, 100% { opacity: 1; inset: -3%; }
+  0%, 77% { opacity: 0; inset: 38% 33%; }
+  79% { opacity: 1; inset: 38% 33%; }
+  82% { opacity: 1; inset: 22% 18%; }
+  86%, 100% { opacity: 1; inset: -3%; }
 }
 @keyframes home-opening-name {
-  0%, 80% { opacity: 0; transform: translateY(9px); }
-  85%, 96% { opacity: 1; transform: translateY(0); }
+  0%, 83% { opacity: 0; transform: translateY(9px); }
+  87%, 96% { opacity: 1; transform: translateY(0); }
   100% { opacity: 0; transform: translateY(0); }
 }
 @keyframes home-opening-light {
   0% { opacity: 0; transform: translate(-50%, -50%) scale(.7); }
-  22%, 70% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  32%, 70% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
   100% { opacity: 0; transform: translate(-50%, -50%) scale(1.3); }
 }
 @keyframes home-opening-skip {
@@ -315,6 +372,8 @@
 html.home-opening-seen .home-opening { display: none; }
 @media (max-width: 640px) {
   .home-opening__stationery { width: min(86vw, 430px); top: 59%; }
+  .home-opening__lake { background-position: 64% center; }
+  .home-opening__flying-letter { width: min(60vw, 310px); }
   .home-opening__paper-title { font-size: clamp(20px, 5.5vw, 27px); }
   .home-opening__knife { --knife-distance: 124%; left: -62%; width: 70%; }
   .home-opening__unfold-inner strong { font-size: clamp(25px, 6vw, 38px); letter-spacing: .02em; }
