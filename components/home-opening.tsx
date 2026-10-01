@@ -6,7 +6,7 @@ import { ART, buildStroke, fracAt, isRetrace, timeAt } from "../lib/home-drawing
 import { createRenderer } from "../lib/home-drawing/renderer";
 
 const SESSION_KEY = "violet-home-drawing-v2-viewed";
-const DRAWING_TIME = 4200;
+const DRAWING_TIME = 28000;
 const clamp = (value: number) => Math.max(0, Math.min(1, value));
 const powerOut = (value: number) => 1 - (1 - clamp(value)) ** 3;
 const accent = (dawn: number) => {
@@ -114,7 +114,7 @@ export function HomeOpening() {
     document.addEventListener("keydown", onKeyDown);
     window.addEventListener("resize", resize);
     reducedMotion.addEventListener?.("change", onMotionChange);
-    const fallback = window.setTimeout(() => finish(), 7500);
+    const fallback = window.setTimeout(() => finish(), DRAWING_TIME + 5000);
     releasePage.current = () => {
       window.cancelAnimationFrame(animationFrame);
       arrival?.cancel();

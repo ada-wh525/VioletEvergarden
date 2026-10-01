@@ -108,6 +108,8 @@ test("normal completion and reduced-motion visits leave the page usable", async 
   await act(async () => root.render(createElement(HomeOpening)));
   await tick(0);
   await tick(4200);
+  assert.equal(container.querySelector(".home-opening").classList.contains("is-arriving"), false);
+  await tick(28000);
   const scene = container.querySelector(".home-opening");
   assert.ok(scene.classList.contains("is-arriving"));
   const painted = contexts.get(container.querySelector(".home-opening__ink")).strokes[0];

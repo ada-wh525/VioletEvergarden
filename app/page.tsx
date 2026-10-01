@@ -360,7 +360,6 @@ export default function Home() {
       </nav>
 
       <section className="hero" id="top">
-        <div className="hero-paper" aria-hidden="true" />
         <div className="hero-visual" role="img" aria-label="薇尔莉特原创角色插画">
           <div className="hero-artwork" aria-hidden="true" />
           <div className="hero-shade" />
