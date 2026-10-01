@@ -8,14 +8,14 @@ import { Window } from "happy-dom";
 const project = new URL("../", import.meta.url).pathname;
 await mkdir(join(project, "work"), { recursive: true });
 const directory = await mkdtemp(join(project, "work", "opening-test-"));
-for (const [sourcePath, name] of [["lib/home-drawing/path.ts", "path"], ["lib/home-drawing/camera.ts", "camera"], ["lib/home-drawing/renderer.ts", "renderer"], ["components/home-opening.tsx", "opening"]]) {
+for (const [sourcePath, name] of [["lib/home-drawing/path.ts", "path"], ["lib/home-drawing/camera.ts", "camera"], ["lib/home-drawing/renderer.ts", "renderer"], ["lib/home-drawing/parallel.ts", "parallel"], ["components/home-opening.tsx", "opening"]]) {
   let source = await readFile(join(project, sourcePath), "utf8");
   if (name === "path") {
     source = source.replace("import svgRaw from './violet-one-stroke.svg?raw';", `const svgRaw = ${JSON.stringify(await readFile(join(project, "lib/home-drawing/violet-one-stroke.svg"), "utf8"))};`)
       .replace("import route from './violet-one-stroke.json';", `const route = ${await readFile(join(project, "lib/home-drawing/violet-one-stroke.json"), "utf8")};`);
   }
   const output = ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext, jsx: ts.JsxEmit.ReactJSX } }).outputText
-    .replace(/(['"])(?:\.\.\/lib\/home-drawing\/|\.\/)(path|camera|renderer)\1/g, '"./$2.mjs"');
+    .replace(/(['"])(?:\.\.\/lib\/home-drawing\/|\.\/)(path|camera|renderer|parallel)\1/g, '"./$2.mjs"');
   await writeFile(join(directory, `${name}.mjs`), output);
 }
 const modulePath = join(directory, "opening.mjs");
@@ -109,7 +109,8 @@ test("normal completion and reduced-motion visits leave the page usable", async 
   await tick(0);
   await tick(4200);
   assert.equal(container.querySelector(".home-opening").classList.contains("is-arriving"), false);
-  await tick(28000);
+  assert.equal(contexts.get(container.querySelector(".home-opening__ink")).strokes[0].filter(([command]) => command === "M").length, 3);
+  await tick(11000);
   const scene = container.querySelector(".home-opening");
   assert.ok(scene.classList.contains("is-arriving"));
   const painted = contexts.get(container.querySelector(".home-opening__ink")).strokes[0];
@@ -145,11 +146,14 @@ test("preview query replays the drawing without clearing the session", async () 
   sessionStorage.setItem("violet-home-drawing-v2-viewed", "1");
   document.documentElement.classList.add("home-opening-seen");
   window.matchMedia = () => ({ matches: false });
-  window.history.replaceState(null, "", "/?opening=1");
+  window.history.replaceState(null, "", "/?opening=1&pens=1");
   root = createRoot(container);
   await act(async () => root.render(createElement(HomeOpening)));
   assert.ok(container.querySelector(".home-opening"));
   assert.equal(document.documentElement.classList.contains("home-opening-seen"), false);
+  await tick(0);
+  await tick(4200);
+  assert.equal(contexts.get(container.querySelector(".home-opening__ink")).strokes[0].filter(([command]) => command === "M").length, 1);
   await act(async () => container.querySelector("button").click());
   assert.equal(main.hasAttribute("inert"), false);
   await act(async () => root.unmount());

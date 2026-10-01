@@ -4,9 +4,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { buildCamera } from "../lib/home-drawing/camera";
 import { ART, buildStroke, fracAt, isRetrace, timeAt } from "../lib/home-drawing/path";
 import { createRenderer } from "../lib/home-drawing/renderer";
+import { createParallelRenderer, parallelCamera } from "../lib/home-drawing/parallel";
 
 const SESSION_KEY = "violet-home-drawing-v2-viewed";
-const DRAWING_TIME = 28000;
+const DRAWING_TIME = 11000;
 const clamp = (value: number) => Math.max(0, Math.min(1, value));
 const powerOut = (value: number) => 1 - (1 - clamp(value)) ** 3;
 const accent = (dawn: number) => {
@@ -50,7 +51,8 @@ export function HomeOpening() {
       return;
     }
     const stroke = buildStroke();
-    const renderer = createRenderer(ink.current, glow.current, stroke);
+    const singlePen = new URLSearchParams(location.search).get("pens") === "1";
+    const renderer = singlePen ? createRenderer(ink.current, glow.current, stroke) : createParallelRenderer(ink.current, glow.current, stroke);
     document.documentElement.classList.remove("home-opening-seen");
     document.documentElement.classList.add("home-opening-playing");
 
@@ -69,7 +71,9 @@ export function HomeOpening() {
     let height = window.innerHeight;
     const layout = () => {
       renderer.resize(width, height);
-      return buildCamera(stroke, { w: width, h: height, u0: 0, anchor: { x: width * .54, y: height * .45 } });
+      return singlePen
+        ? buildCamera(stroke, { w: width, h: height, u0: 0, anchor: { x: width * .54, y: height * .45 } })
+        : parallelCamera(width, height);
     };
     let camera = layout();
     let lastTimestamp = 0;
@@ -90,7 +94,7 @@ export function HomeOpening() {
       const cam = camera.at(value);
       // The same frame fields as the original timeline, without its lettering.
       renderer.draw({
-        cam, frac: fracAt(value), retrace,
+        cam, frac: fracAt(value), retrace, progress: value,
         gem: clamp((value - gemTime) / .012),
         rest: powerOut((value - .965) / .035),
         dot: 3 * cam.k / camera.first.k,
