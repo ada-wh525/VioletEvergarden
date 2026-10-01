@@ -1,11 +1,18 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { createDrawingCamera } from "../lib/violet-drawing";
-import { VIOLET_GEM, VIOLET_OUTLINE } from "../lib/violet-outline";
+import { buildCamera } from "../lib/home-drawing/camera";
+import { ART, buildStroke, fracAt, isRetrace, timeAt } from "../lib/home-drawing/path";
+import { createRenderer } from "../lib/home-drawing/renderer";
 
-const SESSION_KEY = "violet-home-drawing-viewed";
+const SESSION_KEY = "violet-home-drawing-v2-viewed";
 const DRAWING_TIME = 4200;
+const clamp = (value: number) => Math.max(0, Math.min(1, value));
+const powerOut = (value: number) => 1 - (1 - clamp(value)) ** 3;
+const accent = (dawn: number) => {
+  const colors = [[47, 214, 162], [10, 143, 102]];
+  return `rgb(${colors[0].map((channel, index) => Math.round(channel + (colors[1][index] - channel) * dawn)).join(",")})`;
+};
 
 export function HomeOpening() {
   const [visible, setVisible] = useState(true);
@@ -14,12 +21,9 @@ export function HomeOpening() {
   const releasePage = useRef<(() => void) | null>(null);
   const skipButton = useRef<HTMLButtonElement>(null);
   const art = useRef<HTMLDivElement>(null);
-  const svg = useRef<SVGSVGElement>(null);
-  const cameraGroup = useRef<SVGGElement>(null);
-  const outline = useRef<SVGPathElement>(null);
-  const freshInk = useRef<SVGPathElement>(null);
-  const pen = useRef<SVGCircleElement>(null);
-  const gem = useRef<SVGPathElement>(null);
+  const drawing = useRef<HTMLDivElement>(null);
+  const ink = useRef<HTMLCanvasElement>(null);
+  const glow = useRef<HTMLCanvasElement>(null);
 
   const finish = useCallback((focusHeading = false) => {
     if (finished.current) return;
@@ -41,7 +45,12 @@ export function HomeOpening() {
       finish();
       return;
     }
-    const camera = createDrawingCamera();
+    if (!ink.current?.getContext("2d") || !glow.current?.getContext("2d")) {
+      finish();
+      return;
+    }
+    const stroke = buildStroke();
+    const renderer = createRenderer(ink.current, glow.current, stroke);
     document.documentElement.classList.remove("home-opening-seen");
     document.documentElement.classList.add("home-opening-playing");
 
@@ -58,21 +67,36 @@ export function HomeOpening() {
     let progress = 0;
     let width = window.innerWidth;
     let height = window.innerHeight;
-    const paint = (value: number) => {
-      svg.current?.setAttribute("viewBox", `0 0 ${width} ${height}`);
-      const frame = camera.frame(value, width, height);
-      cameraGroup.current?.setAttribute("transform", `translate(${width / 2} ${height / 2}) scale(${frame.scale}) translate(${-frame.x} ${-frame.y})`);
-      outline.current?.setAttribute("stroke-dashoffset", String(1 - frame.fraction));
-      outline.current?.setAttribute("stroke-width", String(frame.lineWidth));
-      freshInk.current?.setAttribute("stroke-dasharray", `${frame.tail} 2`);
-      freshInk.current?.setAttribute("stroke-dashoffset", String(frame.tail - frame.fraction));
-      freshInk.current?.setAttribute("stroke-width", String(frame.lineWidth));
-      freshInk.current?.setAttribute("opacity", value > 0 && value < 1 ? "1" : "0");
-      pen.current?.setAttribute("cx", String(frame.pen.x));
-      pen.current?.setAttribute("cy", String(frame.pen.y));
-      pen.current?.setAttribute("r", String(3.5 / frame.scale));
-      pen.current?.setAttribute("opacity", value < 1 ? "1" : "0");
-      gem.current?.setAttribute("opacity", String(frame.gemOpacity));
+    const layout = () => {
+      renderer.resize(width, height);
+      return buildCamera(stroke, { w: width, h: height, u0: 0, anchor: { x: width * .54, y: height * .45 } });
+    };
+    let camera = layout();
+    let lastTimestamp = 0;
+    let retrace = 0;
+    let retraceFrom = 0;
+    let retraceTarget = 0;
+    let retraceStarted = 0;
+    const gemTime = timeAt(stroke.gem.doneAt);
+    const paint = (value: number, timestamp = lastTimestamp) => {
+      const nextRetrace = isRetrace(value) ? 1 : 0;
+      if (nextRetrace !== retraceTarget) {
+        retraceFrom = retrace;
+        retraceTarget = nextRetrace;
+        retraceStarted = timestamp;
+      }
+      retrace = retraceFrom + (retraceTarget - retraceFrom) * powerOut((timestamp - retraceStarted) / 300);
+      lastTimestamp = timestamp;
+      const cam = camera.at(value);
+      // The same frame fields as the original timeline, without its lettering.
+      renderer.draw({
+        cam, frac: fracAt(value), retrace,
+        gem: clamp((value - gemTime) / .012),
+        rest: powerOut((value - .965) / .035),
+        dot: 3 * cam.k / camera.first.k,
+        stop: 5.4,
+        accent: accent(clamp((value - .855) / (.985 - .855)) ** 3),
+      });
     };
 
     const resize = () => {
@@ -80,6 +104,7 @@ export function HomeOpening() {
       if (isArriving) { finish(); return; }
       width = window.innerWidth;
       height = window.innerHeight;
+      camera = layout();
       paint(progress);
     };
     const onKeyDown = (event: KeyboardEvent) => {
@@ -106,10 +131,12 @@ export function HomeOpening() {
       const destination = document.querySelector<HTMLElement>("#top .hero-visual")?.getBoundingClientRect();
       if (!destination?.width || !destination.height || !art.current?.animate) { finish(); return; }
       isArriving = true;
-      const frame = camera.frame(1, width, height);
-      const scale = Math.max(frame.scale * 1.3, destination.height * .98 / 1448);
-      cameraGroup.current?.style.setProperty("--drawing-start", `matrix(${frame.scale}, 0, 0, ${frame.scale}, ${width / 2 - frame.x * frame.scale}, ${height / 2 - frame.y * frame.scale})`);
-      cameraGroup.current?.style.setProperty("--drawing-end", `matrix(${scale}, 0, 0, ${scale}, ${destination.left + destination.width / 2 - 543 * scale}, ${destination.top + destination.height / 2 - 724 * scale})`);
+      const frame = camera.at(1);
+      const scale = Math.max(frame.k * 1.3, destination.height * .98 / ART.h);
+      const zoom = scale / frame.k;
+      const x = destination.left + destination.width / 2 - ART.w / 2 * scale - zoom * (width / 2 - frame.x * frame.k);
+      const y = destination.top + destination.height / 2 - ART.h / 2 * scale - zoom * (height / 2 - frame.y * frame.k);
+      drawing.current?.style.setProperty("--drawing-end", `matrix(${zoom}, 0, 0, ${zoom}, ${x}, ${y})`);
       arrival = art.current.animate([
         { left: "0px", top: "0px", width: `${width}px`, height: `${height}px` },
         { left: `${destination.left}px`, top: `${destination.top}px`, width: `${destination.width}px`, height: `${destination.height}px` },
@@ -121,7 +148,7 @@ export function HomeOpening() {
       if (finished.current) return;
       started ??= timestamp;
       progress = Math.min(1, Math.max(0, (timestamp - started) / DRAWING_TIME));
-      paint(progress);
+      paint(progress, timestamp);
       if (progress < 1) animationFrame = window.requestAnimationFrame(draw);
       else arrive();
     };
@@ -145,14 +172,10 @@ export function HomeOpening() {
         <div className="hero-artwork home-opening__color" />
         <div className="hero-shade home-opening__shade" />
       </div>
-      <svg ref={svg} className="home-opening__drawing" viewBox="0 0 1440 900" aria-hidden="true">
-        <g ref={cameraGroup} className="home-opening__camera">
-          <path ref={gem} d={VIOLET_GEM} className="home-opening__gem" opacity="0" />
-          <path ref={outline} d={VIOLET_OUTLINE} className="home-opening__line" pathLength="1" strokeDasharray="1" strokeDashoffset="1" vectorEffect="non-scaling-stroke" />
-          <path ref={freshInk} d={VIOLET_OUTLINE} className="home-opening__line home-opening__fresh-ink" pathLength="1" vectorEffect="non-scaling-stroke" opacity="0" />
-          <circle ref={pen} className="home-opening__pen" opacity="0" />
-        </g>
-      </svg>
+      <div ref={drawing} className="home-opening__drawing" aria-hidden="true">
+        <canvas ref={ink} className="home-opening__ink" />
+        <canvas ref={glow} className="home-opening__glow" />
+      </div>
       <button ref={skipButton} className="home-opening__skip" type="button" onClick={() => finish(true)}>跳过 <span aria-hidden="true">↗</span></button>
     </div>
   );

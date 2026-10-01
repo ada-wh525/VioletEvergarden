@@ -29,17 +29,16 @@
   width: 100%;
   height: 100%;
   pointer-events: none;
+  transform-origin: 0 0;
 }
-.home-opening__camera { transform-box: view-box; transform-origin: 0 0; }
-.home-opening__line {
-  fill: none;
-  stroke: var(--ink);
-  stroke-width: 1.7;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+.home-opening__drawing canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
 }
-.home-opening__fresh-ink { stroke: #0a8f66; }
-.home-opening__gem, .home-opening__pen { fill: #0a8f66; }
+/* Original renderer paints white ink; only its palette changes on white paper. */
+.home-opening__ink { filter: invert(1); }
 .home-opening__skip {
   position: absolute;
   top: max(26px, env(safe-area-inset-top));
@@ -57,8 +56,7 @@
 .home-opening__skip span { margin-left: 8px; }
 .home-opening.is-arriving { animation: home-opening-exit .01s 1.2s linear both; }
 .is-arriving .home-opening__backdrop { animation: home-opening-reveal .7s .45s ease both; }
-.is-arriving .home-opening__camera { animation: home-opening-place 1.2s cubic-bezier(.22,.68,.15,1) both; }
-.is-arriving .home-opening__drawing { animation: home-opening-portrait 1.2s ease both; }
+.is-arriving .home-opening__drawing { animation: home-opening-place 1.2s cubic-bezier(.22,.68,.15,1) both, home-opening-portrait 1.2s ease both; }
 .is-arriving .home-opening__color, .is-arriving .home-opening__shade { animation: home-opening-color .65s .5s ease both; }
 .is-arriving .home-opening__skip { animation: home-opening-reveal .2s ease both; }
 @keyframes home-opening-portrait {
@@ -66,7 +64,7 @@
   100% { opacity: 0; }
 }
 @keyframes home-opening-place {
-  from { transform: var(--drawing-start); }
+  from { transform: matrix(1, 0, 0, 1, 0, 0); }
   to { transform: var(--drawing-end); }
 }
 @keyframes home-opening-color { to { opacity: 1; } }

@@ -104,4 +104,4 @@ npm test
 
 ## 首页绘画入场（本地测试）
 
-人物线稿参考 [Dear Violet](https://violet-evergarden.pages.dev/)：约 4.2 秒连续绘画，随后放大并移向左侧人物图，渐变接到水平翻转后的首页插画。首页改为左图右文，入场底色使用首页的纸白色，不播放字迹。右上角可跳过，同一标签页会话只播放一次；打开 `/?opening=1` 可重播。减少动态效果、锚点访问和禁用 JavaScript 时直接显示首页。
+直接使用站主提供的 [Dear Violet](https://violet-evergarden.pages.dev/) 源码：`lib/home-drawing/` 中的 `path.ts`、`camera.ts`、`renderer.ts`、SVG 和路线 JSON 原样保留，使用原版双 Canvas 绘制，不使用 SVG 描边动画。约 4.2 秒连续绘画，随后放大并移向左侧人物图，渐变接到水平翻转后的首页插画。首页改为左图右文，入场底色使用首页的纸白色，不播放字迹。右上角可跳过，同一标签页会话只播放一次；打开 `/?opening=1` 可重播。减少动态效果、锚点访问、Canvas 不可用和禁用 JavaScript 时直接显示首页。
