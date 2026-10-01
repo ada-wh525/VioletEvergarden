@@ -102,6 +102,6 @@ npm test
 
 外观参考：[Underwood 四排键便携机与动画截图的实机对照](https://summivox.wordpress.com/2018/02/07/violet-evergardens-typewriter/)。本实现参考其机身、圆键、双线轴、打字杆和回车杆形态，并为现代键盘及中文输入法做适配；型号对应属于外观考据，不表示官方确认。
 
-## 首页启封入场（测试分支）
+## 首页绘画入场（本地测试）
 
-在 `test/envelope-home-intro` 分支首次打开首页，先播放[湖景动图](https://tenor.com/view/violet-evergarden-violet-lake-lake-scene-flowers-gif-22800800)，湖景向左滑走时信飞向明亮的书桌，落成信封后封面上的本地日期与时间持续更新；随后拆信刀沿上沿划过，信纸抽出、摊开并放大，停留展示中文名字。右上角可跳过；同一标签页会话中不会反复播放。想重新查看时打开 `/?opening=1`，手机和减少动态效果设置同样可用。内容和交互保持在原首页，加载失败不会被入场遮住。
+人物线稿参考 [Dear Violet](https://violet-evergarden.pages.dev/)：约 4.2 秒连续绘画，随后放大并移向左侧人物图，渐变接到水平翻转后的首页插画。首页改为左图右文，入场底色使用首页的纸白色，不播放字迹。右上角可跳过，同一标签页会话只播放一次；打开 `/?opening=1` 可重播。减少动态效果、锚点访问和禁用 JavaScript 时直接显示首页。

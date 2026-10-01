@@ -361,6 +361,15 @@ export default function Home() {
 
       <section className="hero" id="top">
         <div className="hero-paper" aria-hidden="true" />
+        <div className="hero-visual" role="img" aria-label="薇尔莉特原创角色插画">
+          <div className="hero-artwork" aria-hidden="true" />
+          <div className="hero-shade" />
+          <div className="floating-caption">
+            <p>AUTO MEMORIES DOLL<br /><b>莱顿沙夫特里希 · C.H. 邮政公司</b></p>
+          </div>
+          <button className="wax-seal hero-seal" type="button" aria-label="撒下紫罗兰花瓣" onClick={() => setPetalBurst((value) => value + 1)}><span>V</span></button>
+        </div>
+
         <div className="hero-copy">
           <div className="eyebrow"><span>致 未曾谋面的你</span><i /></div>
           <h1 lang="zh-CN" tabIndex={-1}>
@@ -375,14 +384,6 @@ export default function Home() {
             <a className="primary-cta" href="#story"><LetterIcon />开启这封信</a>
             <a className="text-link" href="#profile">认识薇尔莉特 <span>↗</span></a>
           </div>
-        </div>
-
-        <div className="hero-visual" role="img" aria-label="薇尔莉特原创角色插画">
-          <div className="hero-shade" />
-          <div className="floating-caption">
-            <p>AUTO MEMORIES DOLL<br /><b>莱顿沙夫特里希 · C.H. 邮政公司</b></p>
-          </div>
-          <button className="wax-seal hero-seal" type="button" aria-label="撒下紫罗兰花瓣" onClick={() => setPetalBurst((value) => value + 1)}><span>V</span></button>
         </div>
       </section>
 
