@@ -54,10 +54,10 @@
   cursor: pointer;
 }
 .home-opening__skip span { margin-left: 8px; }
-.home-opening.is-arriving { animation: home-opening-exit .01s 1.2s linear both; }
-.is-arriving .home-opening__backdrop { animation: home-opening-reveal .7s .45s ease both; }
-.is-arriving .home-opening__drawing { animation: home-opening-place 1.2s cubic-bezier(.22,.68,.15,1) both, home-opening-portrait 1.2s ease both; }
-.is-arriving .home-opening__color, .is-arriving .home-opening__shade { animation: home-opening-color .65s .5s ease both; }
+.home-opening.is-arriving { animation: home-opening-exit .01s var(--opening-arrival-duration) linear both; }
+.is-arriving .home-opening__backdrop { animation: home-opening-reveal 1.4s .9s ease both; }
+.is-arriving .home-opening__drawing { animation: home-opening-place var(--opening-arrival-duration) cubic-bezier(.22,.68,.15,1) both, home-opening-portrait var(--opening-arrival-duration) ease both; }
+.is-arriving .home-opening__color, .is-arriving .home-opening__shade { animation: home-opening-color 1.3s 1s ease both; }
 .is-arriving .home-opening__skip { animation: home-opening-reveal .2s ease both; }
 @keyframes home-opening-portrait {
   0%, 40% { opacity: 1; }
@@ -70,6 +70,8 @@
 @keyframes home-opening-color { to { opacity: 1; } }
 @keyframes home-opening-reveal { to { opacity: 0; } }
 @keyframes home-opening-exit { to { visibility: hidden; } }
+/* Keep the header opaque and above the moving portrait throughout arrival. */
+html.home-opening-arriving .site-nav { z-index: 130; background: var(--paper); }
 html.home-opening-seen .home-opening { display: none; }
 html.home-opening-playing .hero-visual .hero-artwork { opacity: 0; animation: none; }
 @media (max-width: 640px) {

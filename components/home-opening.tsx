@@ -1,13 +1,12 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { buildCamera } from "../lib/home-drawing/camera";
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import { ART, buildStroke, fracAt, isRetrace, timeAt } from "../lib/home-drawing/path";
-import { createRenderer } from "../lib/home-drawing/renderer";
 import { createParallelRenderer, parallelCamera } from "../lib/home-drawing/parallel";
 
 const SESSION_KEY = "violet-home-drawing-v2-viewed";
 const DRAWING_TIME = 11000;
+const ARRIVAL_TIME = 2400;
 const clamp = (value: number) => Math.max(0, Math.min(1, value));
 const powerOut = (value: number) => 1 - (1 - clamp(value)) ** 3;
 const accent = (dawn: number) => {
@@ -51,8 +50,7 @@ export function HomeOpening() {
       return;
     }
     const stroke = buildStroke();
-    const singlePen = new URLSearchParams(location.search).get("pens") === "1";
-    const renderer = singlePen ? createRenderer(ink.current, glow.current, stroke) : createParallelRenderer(ink.current, glow.current, stroke);
+    const renderer = createParallelRenderer(ink.current, glow.current, stroke);
     document.documentElement.classList.remove("home-opening-seen");
     document.documentElement.classList.add("home-opening-playing");
 
@@ -71,9 +69,7 @@ export function HomeOpening() {
     let height = window.innerHeight;
     const layout = () => {
       renderer.resize(width, height);
-      return singlePen
-        ? buildCamera(stroke, { w: width, h: height, u0: 0, anchor: { x: width * .54, y: height * .45 } })
-        : parallelCamera(width, height);
+      return parallelCamera(width, height);
     };
     let camera = layout();
     let lastTimestamp = 0;
@@ -118,7 +114,7 @@ export function HomeOpening() {
     document.addEventListener("keydown", onKeyDown);
     window.addEventListener("resize", resize);
     reducedMotion.addEventListener?.("change", onMotionChange);
-    const fallback = window.setTimeout(() => finish(), DRAWING_TIME + 5000);
+    const fallback = window.setTimeout(() => finish(), DRAWING_TIME + ARRIVAL_TIME + 3000);
     releasePage.current = () => {
       window.cancelAnimationFrame(animationFrame);
       arrival?.cancel();
@@ -126,7 +122,7 @@ export function HomeOpening() {
       document.removeEventListener("keydown", onKeyDown);
       window.removeEventListener("resize", resize);
       reducedMotion.removeEventListener?.("change", onMotionChange);
-      document.documentElement.classList.remove("home-opening-playing");
+      document.documentElement.classList.remove("home-opening-playing", "home-opening-arriving");
       if (!wasInert) page?.removeAttribute("inert");
       document.body.style.overflow = previousOverflow;
     };
@@ -135,6 +131,7 @@ export function HomeOpening() {
       const destination = document.querySelector<HTMLElement>("#top .hero-visual")?.getBoundingClientRect();
       if (!destination?.width || !destination.height || !art.current?.animate) { finish(); return; }
       isArriving = true;
+      document.documentElement.classList.add("home-opening-arriving");
       const frame = camera.at(1);
       const scale = Math.max(frame.k * 1.3, destination.height * .98 / ART.h);
       const zoom = scale / frame.k;
@@ -144,7 +141,7 @@ export function HomeOpening() {
       arrival = art.current.animate([
         { left: "0px", top: "0px", width: `${width}px`, height: `${height}px` },
         { left: `${destination.left}px`, top: `${destination.top}px`, width: `${destination.width}px`, height: `${destination.height}px` },
-      ], { duration: 1200, easing: "cubic-bezier(.22,.68,.15,1)", fill: "forwards" });
+      ], { duration: ARRIVAL_TIME, easing: "cubic-bezier(.22,.68,.15,1)", fill: "forwards" });
       setArriving(true);
     };
     let started: number | null = null;
@@ -168,7 +165,7 @@ export function HomeOpening() {
   if (!visible) return null;
 
   return (
-    <div className={`home-opening${arriving ? " is-arriving" : ""}`} role="dialog" aria-modal="true" aria-label="人物绘画入场" onAnimationEnd={(event) => {
+    <div className={`home-opening${arriving ? " is-arriving" : ""}`} style={{ "--opening-arrival-duration": `${ARRIVAL_TIME}ms` } as CSSProperties} role="dialog" aria-modal="true" aria-label="人物绘画入场" onAnimationEnd={(event) => {
       if (event.target === event.currentTarget && event.animationName === "home-opening-exit") finish();
     }}>
       <div className="home-opening__backdrop" aria-hidden="true" />

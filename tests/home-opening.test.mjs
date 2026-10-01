@@ -65,7 +65,9 @@ const main = document.createElement("main");
 main.innerHTML = '<section id="top"><div class="hero-visual"></div><h1 tabindex="-1">薇尔莉特</h1></section>';
 main.querySelector(".hero-visual").getBoundingClientRect = () => ({ left: 0, top: 78, width: 700, height: 822 });
 let arrivalFrames;
-window.HTMLElement.prototype.animate = (keyframes) => {
+let arrivalOptions;
+window.HTMLElement.prototype.animate = (keyframes, options) => {
+  arrivalOptions = options;
   arrivalFrames = keyframes;
   return { cancel() {} };
 };
@@ -113,6 +115,9 @@ test("normal completion and reduced-motion visits leave the page usable", async 
   await tick(11000);
   const scene = container.querySelector(".home-opening");
   assert.ok(scene.classList.contains("is-arriving"));
+  assert.ok(document.documentElement.classList.contains("home-opening-arriving"));
+  assert.equal(arrivalOptions.duration, 2400);
+  assert.equal(scene.style.getPropertyValue("--opening-arrival-duration"), "2400ms");
   const painted = contexts.get(container.querySelector(".home-opening__ink")).strokes[0];
   assert.equal(painted.filter(([command]) => command === "C").length, 697);
   const end = painted.at(-1).slice(-2);
@@ -129,6 +134,7 @@ test("normal completion and reduced-motion visits leave the page usable", async 
   const event = new window.Event("animationend", { bubbles: true });
   Object.defineProperty(event, "animationName", { value: "home-opening-exit" });
   await act(async () => scene.dispatchEvent(event));
+  assert.equal(document.documentElement.classList.contains("home-opening-arriving"), false);
   assert.equal(container.querySelector(".home-opening"), null);
   assert.equal(main.hasAttribute("inert"), false);
 
@@ -142,7 +148,7 @@ test("normal completion and reduced-motion visits leave the page usable", async 
   await act(async () => root.unmount());
 });
 
-test("preview query replays the drawing without clearing the session", async () => {
+test("preview replays three pens even with the retired single-pen query", async () => {
   sessionStorage.setItem("violet-home-drawing-v2-viewed", "1");
   document.documentElement.classList.add("home-opening-seen");
   window.matchMedia = () => ({ matches: false });
@@ -153,7 +159,7 @@ test("preview query replays the drawing without clearing the session", async () 
   assert.equal(document.documentElement.classList.contains("home-opening-seen"), false);
   await tick(0);
   await tick(4200);
-  assert.equal(contexts.get(container.querySelector(".home-opening__ink")).strokes[0].filter(([command]) => command === "M").length, 1);
+  assert.equal(contexts.get(container.querySelector(".home-opening__ink")).strokes[0].filter(([command]) => command === "M").length, 3);
   await act(async () => container.querySelector("button").click());
   assert.equal(main.hasAttribute("inert"), false);
   await act(async () => root.unmount());
