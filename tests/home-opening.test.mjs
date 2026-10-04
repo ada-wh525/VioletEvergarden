@@ -8,14 +8,14 @@ import { Window } from "happy-dom";
 const project = new URL("../", import.meta.url).pathname;
 await mkdir(join(project, "work"), { recursive: true });
 const directory = await mkdtemp(join(project, "work", "opening-test-"));
-for (const [sourcePath, name] of [["lib/home-drawing/path.ts", "path"], ["lib/home-drawing/camera.ts", "camera"], ["lib/home-drawing/renderer.ts", "renderer"], ["lib/home-drawing/spots.ts", "spots"], ["lib/home-drawing/portrait.ts", "portrait"], ["lib/home-drawing/releases.ts", "releases"], ["components/home-opening.tsx", "opening"]]) {
+for (const [sourcePath, name] of [["lib/home-drawing/path.ts", "path"], ["lib/home-drawing/camera.ts", "camera"], ["lib/home-drawing/renderer.ts", "renderer"], ["lib/home-drawing/spots.ts", "spots"], ["lib/home-drawing/portrait.ts", "portrait"], ["lib/home-drawing/releases.ts", "releases"], ["lib/home-drawing/playback.ts", "playback"], ["components/home-opening.tsx", "opening"]]) {
   let source = await readFile(join(project, sourcePath), "utf8");
   if (name === "path") {
     source = source.replace("import svgRaw from './violet-one-stroke.svg?raw';", `const svgRaw = ${JSON.stringify(await readFile(join(project, "lib/home-drawing/violet-one-stroke.svg"), "utf8"))};`)
       .replace("import route from './violet-one-stroke.json';", `const route = ${await readFile(join(project, "lib/home-drawing/violet-one-stroke.json"), "utf8")};`);
   }
   const output = ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext, jsx: ts.JsxEmit.ReactJSX } }).outputText
-    .replace(/(['"])(?:\.\.\/lib\/home-drawing\/|\.\/)(path|camera|renderer|spots|portrait|releases)\1/g, '"./$2.mjs"');
+    .replace(/(['"])(?:\.\.\/lib\/home-drawing\/|\.\/)(path|camera|renderer|spots|portrait|releases|playback)\1/g, '"./$2.mjs"');
   await writeFile(join(directory, `${name}.mjs`), output);
 }
 const modulePath = join(directory, "opening.mjs");
@@ -59,6 +59,7 @@ async function tick(timestamp) {
 const { createElement, act } = await import("react");
 const { createRoot } = await import("react-dom/client");
 const { HomeOpening } = await import(modulePath);
+const { PLAYBACK_DURATION, PLAYBACK_SEGMENTS, drawingTimeAt } = await import(join(directory, "playback.mjs"));
 const { buildStroke } = await import(join(directory, "path.mjs"));
 const container = document.createElement("div");
 const main = document.createElement("main");
@@ -73,6 +74,20 @@ window.HTMLElement.prototype.animate = (keyframes, options) => {
 };
 document.body.append(container, main);
 let root = createRoot(container);
+
+test("release reading time is longer while other drawing runs ten percent faster", () => {
+  let wallTime = 0;
+  for (const segment of PLAYBACK_SEGMENTS) {
+    assert.ok(Math.abs(drawingTimeAt(wallTime) - segment.from) < 1e-7);
+    const midpoint = wallTime + segment.duration / 2;
+    assert.ok(Math.abs(drawingTimeAt(midpoint) - (segment.from + segment.to) / 2) < 1e-7);
+    wallTime += segment.duration;
+  }
+  assert.equal(PLAYBACK_SEGMENTS.filter(s => s.speed === .75).length, 4);
+  assert.ok(PLAYBACK_SEGMENTS.filter(s => s.speed === .75).every(s => s.duration > 6000));
+  assert.ok(PLAYBACK_SEGMENTS.slice(1).filter(s => s.speed !== .75).every(s => s.speed === 1.1));
+  assert.equal(drawingTimeAt(PLAYBACK_DURATION + 1000), 30150);
+});
 
 test("first visit draws a portrait, then skip restores focus and remembers the visit", async () => {
   await act(async () => root.render(createElement(HomeOpening)));
@@ -113,7 +128,7 @@ test("normal completion and reduced-motion visits leave the page usable", async 
   await tick(4200);
   assert.equal(container.querySelector(".home-opening").classList.contains("is-arriving"), false);
   assert.equal(contexts.get(container.querySelector(".home-opening__ink")).strokes[0].filter(([command]) => command === "M").length, 1);
-  await tick(30150);
+  await tick(PLAYBACK_DURATION + 1);
   const scene = container.querySelector(".home-opening");
   assert.ok(scene.classList.contains("is-arriving"));
   assert.ok(document.documentElement.classList.contains("home-opening-arriving"));
@@ -197,7 +212,7 @@ test("release cards follow the drawing, pause preserves progress, and Escape rel
   assert.equal(JSON.stringify(contexts.get(container.querySelector(".home-opening__ink")).strokes), before);
   await act(async () => container.querySelector(".home-opening").click());
   assert.match(container.querySelector(".pointer-word").textContent, /播放中/);
-  await tick(22000);
+  await tick(24000);
   assert.equal(releases[0].getAttribute("aria-hidden"), "true");
   assert.equal(releases[1].getAttribute("aria-hidden"), "false");
   const scene = container.querySelector(".home-opening");

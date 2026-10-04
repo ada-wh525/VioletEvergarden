@@ -7,10 +7,9 @@ import { createRenderer } from "../lib/home-drawing/renderer";
 import { pickSpots } from "../lib/home-drawing/spots";
 import { portraitBox } from "../lib/home-drawing/portrait";
 import { RELEASES } from "../lib/home-drawing/releases";
+import { INTRO_TIME, DRAWING_TIME, drawingTimeAt } from "../lib/home-drawing/playback";
 
 const SESSION_KEY = "violet-home-drawing-v3-viewed";
-const INTRO_TIME = 2150;
-const DRAWING_TIME = 28000;
 const ARRIVAL_TIME = 2400;
 const clamp = (value: number) => Math.max(0, Math.min(1, value));
 const powerOut = (value: number) => 1 - (1 - clamp(value)) ** 3;
@@ -78,6 +77,7 @@ export function HomeOpening() {
     let arrivalTimeout: number | undefined;
     let isArriving = false;
     let elapsed = 0;
+    let playbackElapsed = 0;
     let previous: number | null = null;
     let width = window.innerWidth;
     let height = window.innerHeight;
@@ -228,7 +228,8 @@ export function HomeOpening() {
       if (finished.current) return;
       const delta = previous === null ? 0 : timestamp - previous;
       previous = timestamp;
-      if (!pausedRef.current && !document.hidden) elapsed += delta;
+      if (!pausedRef.current && !document.hidden) playbackElapsed += delta;
+      elapsed = drawingTimeAt(playbackElapsed);
       if (paint() < 1) animationFrame = window.requestAnimationFrame(draw);
       else arrive();
     };
@@ -249,7 +250,7 @@ export function HomeOpening() {
       </div>
       <div className="home-opening__drawing home-opening__drawing--ink" aria-hidden="true"><canvas ref={ink} className="home-opening__ink" /></div>
       <div className="home-opening__drawing" aria-hidden="true"><canvas ref={glow} className="home-opening__glow" /></div>
-      <p ref={title} className="home-opening__title" aria-hidden="true">紫罗兰<br />永恒花园</p>
+      <p ref={title} className="home-opening__title" aria-hidden="true"><span className="opening-title-prefix">紫罗兰</span><span className="opening-title-name">永恒花园</span></p>
       {RELEASES.map((release, i) => (
         <article className="home-opening__release" key={release.date} ref={(element) => { cards.current[i] = element; }} aria-hidden="true">
           {/* eslint-disable-next-line @next/next/no-img-element */}
