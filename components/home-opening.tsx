@@ -26,6 +26,9 @@ export function HomeOpening() {
   const [visible, setVisible] = useState(true);
   const [arriving, setArriving] = useState(false);
   const [paused, setPaused] = useState(false);
+  const [skipping, setSkipping] = useState(false);
+  const skipToArrival = useRef<(() => void) | null>(null);
+  const focusAfterArrival = useRef(false);
   const pausedRef = useRef(false);
   const finished = useRef(false);
   const releasePage = useRef<(() => void) | null>(null);
@@ -39,7 +42,7 @@ export function HomeOpening() {
   const glow = useRef<HTMLCanvasElement>(null);
   const cards = useRef<Array<HTMLElement | null>>([]);
 
-  const finish = useCallback((focusHeading = false) => {
+  const finish = useCallback((focusHeading = focusAfterArrival.current) => {
     if (finished.current) return;
     finished.current = true;
     try { sessionStorage.setItem(SESSION_KEY, "1"); } catch { /* Storage is optional. */ }
@@ -76,6 +79,7 @@ export function HomeOpening() {
     let arrival: Animation | null = null;
     let arrivalTimeout: number | undefined;
     let isArriving = false;
+    let isSkipping = false;
     let elapsed = 0;
     let playbackElapsed = 0;
     let visiblePlayback = 0;
@@ -154,7 +158,7 @@ export function HomeOpening() {
       camera = layout(); paint();
     };
     const togglePlayback = () => {
-      if (isArriving || finished.current) return;
+      if (isArriving || isSkipping || finished.current) return;
       pausedRef.current = !pausedRef.current;
       settling = pausedRef.current;
       settleFrom = visiblePlayback;
@@ -199,6 +203,7 @@ export function HomeOpening() {
     reducedMotion.addEventListener?.("change", onMotionChange);
     releasePage.current = () => {
       window.cancelAnimationFrame(animationFrame);
+      skipToArrival.current = null;
       arrival?.cancel();
       window.clearTimeout(arrivalTimeout);
       scene?.removeEventListener("click", onClick);
@@ -231,6 +236,26 @@ export function HomeOpening() {
       setArriving(true);
       arrivalTimeout = window.setTimeout(() => finish(), ARRIVAL_TIME + 100);
     };
+    skipToArrival.current = () => {
+      if (isSkipping || isArriving || finished.current) return;
+      isSkipping = true;
+      focusAfterArrival.current = true;
+      pausedRef.current = false;
+      setPaused(false);
+      setSkipping(true);
+      window.cancelAnimationFrame(animationFrame);
+      playbackElapsed = visiblePlayback = PLAYBACK_DURATION;
+      elapsed = INTRO_TIME + DRAWING_TIME;
+      paint();
+      // Give the completed portrait a brief readable beat before the same arrival.
+      let completedAt: number | null = null;
+      const hold = (timestamp: number) => {
+        completedAt ??= timestamp;
+        if (timestamp - completedAt < 180) animationFrame = window.requestAnimationFrame(hold);
+        else arrive();
+      };
+      animationFrame = window.requestAnimationFrame(hold);
+    };
     const draw = (timestamp: number) => {
       if (finished.current) return;
       const delta = previous === null ? 0 : timestamp - previous;
@@ -259,7 +284,7 @@ export function HomeOpening() {
 
   if (!visible) return null;
   return (
-    <div ref={stage} className={`home-opening${arriving ? " is-arriving" : ""}${paused ? " is-paused" : ""}`} style={{ "--opening-arrival-duration": `${ARRIVAL_TIME}ms` } as CSSProperties} role="dialog" aria-modal="true" aria-label="人物绘画入场" aria-describedby="opening-playback-help" tabIndex={-1} onAnimationEnd={(event) => {
+    <div ref={stage} className={`home-opening${arriving ? " is-arriving" : ""}${paused ? " is-paused" : ""}${skipping ? " is-skipping" : ""}`} style={{ "--opening-arrival-duration": `${ARRIVAL_TIME}ms` } as CSSProperties} role="dialog" aria-modal="true" aria-label="人物绘画入场" aria-describedby="opening-playback-help" tabIndex={-1} onAnimationEnd={(event) => {
       if (event.target === event.currentTarget && event.animationName === "home-opening-exit") finish();
     }}>
       <div className="home-opening__backdrop" aria-hidden="true"><div ref={paper} className="home-opening__paper" /></div>
@@ -283,7 +308,7 @@ export function HomeOpening() {
         <div className="pointer-side"><p key={paused ? "paused" : "playing"} className="pointer-word"><b>{paused ? "已暂停" : "播放中"}</b><small><span className="pointer-click">点击</span><span className="pointer-tap">轻触</span>{paused ? "继续" : "暂停"}</small></p></div>
       </div>
       <div className="home-opening__controls">
-        <button ref={skipButton} className="home-opening__skip" type="button" onClick={() => finish(true)}>跳过 <span aria-hidden="true">↗</span></button>
+        <button ref={skipButton} className="home-opening__skip" type="button" disabled={skipping || arriving} onClick={() => skipToArrival.current?.()}>跳过 <span aria-hidden="true">↗</span></button>
       </div>
     </div>
   );

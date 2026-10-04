@@ -89,6 +89,16 @@ test("each release lasts four seconds while other drawing runs ten percent faste
   assert.equal(drawingTimeAt(PLAYBACK_DURATION + 1000), 30150);
 });
 
+async function completeSkippedArrival() {
+  await tick(0);
+  await tick(200);
+  const scene = container.querySelector(".home-opening");
+  assert.ok(scene.classList.contains("is-arriving"));
+  const event = new window.Event("animationend", { bubbles: true });
+  Object.defineProperty(event, "animationName", { value: "home-opening-exit" });
+  await act(async () => scene.dispatchEvent(event));
+}
+
 test("first visit draws a portrait, then skip restores focus and remembers the visit", async () => {
   await act(async () => root.render(createElement(HomeOpening)));
   assert.equal(container.querySelector('[role="dialog"]')?.getAttribute("aria-label"), "人物绘画入场");
@@ -103,6 +113,11 @@ test("first visit draws a portrait, then skip restores focus and remembers the v
   assert.equal(document.body.style.overflow, "hidden");
 
   await act(async () => container.querySelector(".home-opening__skip").click());
+  assert.ok(container.querySelector(".home-opening"));
+  assert.ok(main.hasAttribute("inert"));
+  assert.equal(contexts.get(container.querySelector(".home-opening__ink")).strokes[0].filter(([command]) => command === "C").length, 697);
+  assert.equal(container.querySelector(".home-opening__skip").disabled, true);
+  await completeSkippedArrival();
   assert.equal(container.querySelector(".home-opening"), null);
   assert.equal(main.hasAttribute("inert"), false);
   assert.equal(document.body.style.overflow, "");
@@ -190,6 +205,11 @@ test("preview replays the original drawing without clearing the session", async 
   await tick(4200);
   assert.equal(contexts.get(container.querySelector(".home-opening__ink")).strokes[0].filter(([command]) => command === "M").length, 1);
   await act(async () => container.querySelector(".home-opening__skip").click());
+  assert.ok(container.querySelector(".home-opening"));
+  assert.ok(main.hasAttribute("inert"));
+  assert.equal(contexts.get(container.querySelector(".home-opening__ink")).strokes[0].filter(([command]) => command === "C").length, 697);
+  assert.equal(container.querySelector(".home-opening__skip").disabled, true);
+  await completeSkippedArrival();
   assert.equal(main.hasAttribute("inert"), false);
   await act(async () => root.unmount());
 });

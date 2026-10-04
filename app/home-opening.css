@@ -177,3 +177,6 @@ html.home-opening-playing .hero-visual .hero-artwork { opacity: 0; }
   .pointer-tap { display: inline; }
   .home-opening[data-at-start="false"]:not(.is-paused) .home-opening__pointer { visibility: hidden; }
 }
+
+.is-skipping .home-opening__pointer { visibility: hidden; }
+.home-opening__skip:disabled { opacity: 0; pointer-events: none; }
