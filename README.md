@@ -104,6 +104,8 @@ npm test
 
 ## 首页绘画入场（本地测试）
 
-直接使用站主提供的 [Dear Violet](https://violet-evergarden.pages.dev/) 源码：`lib/home-drawing/` 中的 `path.ts`、`camera.ts`、`renderer.ts`、SVG 和路线 JSON 原样保留，使用原版双 Canvas 绘制，不使用 SVG 描边动画。默认三支画笔沿原始曲线并行绘制，错开约半秒起笔，共用完整构图镜头，约 11 秒完成，随后放大并移向左侧人物图，渐变接到水平翻转后的首页插画。首页改为左图右文，入场底色使用首页的纸白色，不播放字迹。右上角可跳过，同一标签页会话只播放一次；打开 `/?opening=1` 可重播。减少动态效果、锚点访问、Canvas 不可用和禁用 JavaScript 时直接显示首页。
+直接使用站主提供的 [Dear Violet](https://violet-evergarden.pages.dev/) 源码：`lib/home-drawing/` 中的 `path.ts`、`camera.ts`、`renderer.ts`、`spots.ts`、SVG 和路线 JSON 原样保留。恢复原版约 28 秒单线绘画、跟随笔尖的镜头、绿色湿墨和从胸针扩散的亮色过渡。React 入场组件使用同一时间曲线自动播放，保留原版 2.15 秒起笔；支持暂停、继续、跳过和 Escape。英文段落替换为作品封面与日本出版／首播／上映日期，卡片沿用原版空位选择算法。同一会话播放一次，`/?opening=1` 重播。
 
-多画笔仅在原有曲线端点分组，完成时使用原版绘制器输出完整画面，再用 2.4 秒移入左右等宽的首页。
+绘画结束后，用 2.4 秒移入左侧首页人物。`public/violet-portrait.webp` 按原始线稿构图上色，朝向、画幅和主要人物轮廓对应；Canvas 与彩色图片使用相同的变换，并以首页图片实际 `object-fit: contain` 区域为落点。手机布局也按实际区域计算，不另加翻转或裁切。减少动态效果、锚点访问、Canvas 不可用和禁用 JavaScript 时直接显示首页。
+
+作品资料与素材来源见 [docs/opening-assets.md](docs/opening-assets.md)。

@@ -8,14 +8,14 @@ import { Window } from "happy-dom";
 const project = new URL("../", import.meta.url).pathname;
 await mkdir(join(project, "work"), { recursive: true });
 const directory = await mkdtemp(join(project, "work", "opening-test-"));
-for (const [sourcePath, name] of [["lib/home-drawing/path.ts", "path"], ["lib/home-drawing/camera.ts", "camera"], ["lib/home-drawing/renderer.ts", "renderer"], ["lib/home-drawing/parallel.ts", "parallel"], ["components/home-opening.tsx", "opening"]]) {
+for (const [sourcePath, name] of [["lib/home-drawing/path.ts", "path"], ["lib/home-drawing/camera.ts", "camera"], ["lib/home-drawing/renderer.ts", "renderer"], ["lib/home-drawing/spots.ts", "spots"], ["lib/home-drawing/portrait.ts", "portrait"], ["lib/home-drawing/releases.ts", "releases"], ["components/home-opening.tsx", "opening"]]) {
   let source = await readFile(join(project, sourcePath), "utf8");
   if (name === "path") {
     source = source.replace("import svgRaw from './violet-one-stroke.svg?raw';", `const svgRaw = ${JSON.stringify(await readFile(join(project, "lib/home-drawing/violet-one-stroke.svg"), "utf8"))};`)
       .replace("import route from './violet-one-stroke.json';", `const route = ${await readFile(join(project, "lib/home-drawing/violet-one-stroke.json"), "utf8")};`);
   }
   const output = ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ESNext, jsx: ts.JsxEmit.ReactJSX } }).outputText
-    .replace(/(['"])(?:\.\.\/lib\/home-drawing\/|\.\/)(path|camera|renderer|parallel)\1/g, '"./$2.mjs"');
+    .replace(/(['"])(?:\.\.\/lib\/home-drawing\/|\.\/)(path|camera|renderer|spots|portrait|releases)\1/g, '"./$2.mjs"');
   await writeFile(join(directory, `${name}.mjs`), output);
 }
 const modulePath = join(directory, "opening.mjs");
@@ -62,8 +62,8 @@ const { HomeOpening } = await import(modulePath);
 const { buildStroke } = await import(join(directory, "path.mjs"));
 const container = document.createElement("div");
 const main = document.createElement("main");
-main.innerHTML = '<section id="top"><div class="hero-visual"></div><h1 tabindex="-1">薇尔莉特</h1></section>';
-main.querySelector(".hero-visual").getBoundingClientRect = () => ({ left: 0, top: 78, width: 700, height: 822 });
+main.innerHTML = '<section id="top"><div class="hero-visual"><div class="hero-portrait-frame"></div></div><h1 tabindex="-1">薇尔莉特</h1></section>';
+main.querySelector(".hero-portrait-frame").getBoundingClientRect = () => ({ left: 0, top: 78, width: 700, height: 822 });
 let arrivalFrames;
 let arrivalOptions;
 window.HTMLElement.prototype.animate = (keyframes, options) => {
@@ -86,12 +86,12 @@ test("first visit draws a portrait, then skip restores focus and remembers the v
   assert.ok(main.hasAttribute("inert"));
   assert.equal(document.body.style.overflow, "hidden");
 
-  await act(async () => container.querySelector("button").click());
+  await act(async () => container.querySelector(".home-opening__skip").click());
   assert.equal(container.querySelector(".home-opening"), null);
   assert.equal(main.hasAttribute("inert"), false);
   assert.equal(document.body.style.overflow, "");
   assert.equal(frames.size, 0);
-  assert.equal(sessionStorage.getItem("violet-home-drawing-v2-viewed"), "1");
+  assert.equal(sessionStorage.getItem("violet-home-drawing-v3-viewed"), "1");
   await act(async () => new Promise((resolve) => setTimeout(resolve, 5)));
   assert.equal(document.activeElement?.textContent, "薇尔莉特");
 
@@ -111,8 +111,8 @@ test("normal completion and reduced-motion visits leave the page usable", async 
   await tick(0);
   await tick(4200);
   assert.equal(container.querySelector(".home-opening").classList.contains("is-arriving"), false);
-  assert.equal(contexts.get(container.querySelector(".home-opening__ink")).strokes[0].filter(([command]) => command === "M").length, 3);
-  await tick(11000);
+  assert.equal(contexts.get(container.querySelector(".home-opening__ink")).strokes[0].filter(([command]) => command === "M").length, 1);
+  await tick(30150);
   const scene = container.querySelector(".home-opening");
   assert.ok(scene.classList.contains("is-arriving"));
   assert.ok(document.documentElement.classList.contains("home-opening-arriving"));
@@ -125,8 +125,21 @@ test("normal completion and reduced-motion visits leave the page usable", async 
   assert.deepEqual(end, [stroke.end.x, stroke.end.y]);
   assert.ok(painted.every(([, ...values]) => values.every(Number.isFinite)));
   assert.ok(contexts.get(container.querySelector(".home-opening__glow")).fills.some(({ path, alpha }) => alpha === 1 && path.filter(([command]) => command === "C").length === 4));
-  assert.equal(arrivalFrames[1].left, "0px");
-  assert.equal(arrivalFrames[1].width, "700px");
+  const portraitScale = 822 / 1448;
+  assert.equal(parseFloat(arrivalFrames[1].width), 1086 * portraitScale);
+  assert.equal(parseFloat(arrivalFrames[1].left), (700 - 1086 * portraitScale) / 2);
+  assert.equal(arrivalFrames[1].top, "78px");
+  // The canvas artboard corners must land on the same object-fit rectangle.
+  const { buildCamera } = await import(join(directory, "camera.mjs"));
+  const { timeAt } = await import(join(directory, "path.mjs"));
+  const camera = buildCamera(stroke, { w: window.innerWidth, h: window.innerHeight, u0: timeAt(512 / stroke.length), anchor: { x: window.innerWidth * .38, y: window.innerHeight * .64 } });
+  const cam = camera.at(1);
+  const matrix = scene.style.getPropertyValue("--drawing-end").match(/-?[\d.]+/g).map(Number);
+  const screenX = window.innerWidth / 2 - cam.x * cam.k;
+  const screenY = window.innerHeight / 2 - cam.y * cam.k;
+  assert.ok(Math.abs(screenX * matrix[0] + matrix[4] - parseFloat(arrivalFrames[1].left)) < 1e-8);
+  assert.ok(Math.abs(screenY * matrix[3] + matrix[5] - 78) < 1e-8);
+  assert.ok(Math.abs(1086 * cam.k * matrix[0] - parseFloat(arrivalFrames[1].width)) < 1e-8);
   const childEvent = new window.Event("animationend", { bubbles: true });
   Object.defineProperty(childEvent, "animationName", { value: "home-opening-exit" });
   await act(async () => container.querySelector(".home-opening__drawing").dispatchEvent(childEvent));
@@ -148,20 +161,46 @@ test("normal completion and reduced-motion visits leave the page usable", async 
   await act(async () => root.unmount());
 });
 
-test("preview replays three pens even with the retired single-pen query", async () => {
-  sessionStorage.setItem("violet-home-drawing-v2-viewed", "1");
+test("preview replays the original drawing without clearing the session", async () => {
+  sessionStorage.setItem("violet-home-drawing-v3-viewed", "1");
   document.documentElement.classList.add("home-opening-seen");
   window.matchMedia = () => ({ matches: false });
-  window.history.replaceState(null, "", "/?opening=1&pens=1");
+  window.history.replaceState(null, "", "/?opening=1");
   root = createRoot(container);
   await act(async () => root.render(createElement(HomeOpening)));
   assert.ok(container.querySelector(".home-opening"));
   assert.equal(document.documentElement.classList.contains("home-opening-seen"), false);
   await tick(0);
   await tick(4200);
-  assert.equal(contexts.get(container.querySelector(".home-opening__ink")).strokes[0].filter(([command]) => command === "M").length, 3);
-  await act(async () => container.querySelector("button").click());
+  assert.equal(contexts.get(container.querySelector(".home-opening__ink")).strokes[0].filter(([command]) => command === "M").length, 1);
+  await act(async () => container.querySelector(".home-opening__skip").click());
   assert.equal(main.hasAttribute("inert"), false);
+  await act(async () => root.unmount());
+});
+
+test("release cards follow the drawing, pause preserves progress, and Escape releases the page", async () => {
+  sessionStorage.clear();
+  root = createRoot(container);
+  await act(async () => root.render(createElement(HomeOpening)));
+  await tick(0);
+  await tick(6000);
+  const releases = [...container.querySelectorAll(".home-opening__release")];
+  assert.equal(releases.length, 4);
+  assert.equal(releases[0].getAttribute("aria-hidden"), "false");
+  assert.ok(releases[0].textContent.includes("2015.12.25"));
+  assert.equal(releases[1].getAttribute("aria-hidden"), "true");
+  const before = JSON.stringify(contexts.get(container.querySelector(".home-opening__ink")).strokes);
+  await act(async () => container.querySelector(".home-opening__pause").click());
+  await tick(16000);
+  assert.equal(JSON.stringify(contexts.get(container.querySelector(".home-opening__ink")).strokes), before);
+  await act(async () => container.querySelector(".home-opening__pause").click());
+  await tick(22000);
+  assert.equal(releases[0].getAttribute("aria-hidden"), "true");
+  assert.equal(releases[1].getAttribute("aria-hidden"), "false");
+  await act(async () => document.dispatchEvent(new window.KeyboardEvent("keydown", { key: "Escape" })));
+  assert.equal(main.hasAttribute("inert"), false);
+  assert.equal(document.body.style.overflow, "");
+  assert.equal(container.querySelector(".home-opening"), null);
   await act(async () => root.unmount());
 });
 

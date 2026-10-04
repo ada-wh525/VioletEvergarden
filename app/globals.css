@@ -39,10 +39,8 @@ button { color: inherit; font: inherit; }
 .top-sentinel { position: absolute; top: 150px; left: 0; width: 1px; height: 1px; pointer-events: none; }
 @supports (animation-timeline: scroll()) {
   .reading-progress { animation: reading-progress linear both; animation-timeline: scroll(); }
-  .hero-visual .hero-artwork { animation: hero-drift linear both; animation-timeline: scroll(); animation-range: 0 100vh; }
 }
 @keyframes reading-progress { to { transform: scaleX(1); } }
-@keyframes hero-drift { to { transform: translateY(72px) scale(-1.08, 1.08); } }
 
 .site-nav {
   position: fixed;
@@ -162,17 +160,18 @@ h1 {
 
 .hero-visual {
   position: relative; min-width: 0; overflow: hidden;
-  background: var(--paper-deep);
+  background: var(--paper);
 }
 .hero-artwork {
   position: absolute; inset: 0; z-index: 0;
-  background: #7d8499 url("/violet-hero-clean.webp") 80% center / cover no-repeat;
-  transform: scaleX(-1);
+  background: var(--paper);
 }
-.hero-shade { position: absolute; inset: 0; z-index: 1; background: linear-gradient(90deg, rgb(29 41 58 / 12%), transparent 35%), linear-gradient(0deg, rgb(25 33 45 / 35%), transparent 42%); }
+.hero-portrait-frame { position: absolute; inset: 4% 3%; }
+.hero-portrait-frame img { width: 100%; height: 100%; display: block; object-fit: contain; }
+.hero-shade { position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(0deg, var(--paper), transparent 9%); }
 @media (min-width: 901px) {
-  .hero-shade { background: linear-gradient(90deg, transparent 82%, var(--paper) 100%), linear-gradient(0deg, rgb(25 33 45 / 25%), transparent 35%); }
-  .hero .hero-seal { right: 14%; }
+  .hero .hero-seal { right: 8%; bottom: 5%; }
+  .hero .floating-caption { color: var(--ink); bottom: 4%; }
 }
 .floating-caption { position: absolute; z-index: 3; left: 5.5%; bottom: 7%; color: #f7f2e9; }
 .floating-caption p { margin: 0; font: 500 10px/1.8 var(--font-serif), serif; letter-spacing: .18em; }
@@ -851,10 +850,6 @@ footer.contact-footer { position: absolute; z-index: 2; left: 0; right: 0; botto
   .anonymous-letter-form { padding-inline: 45px; }
 }
 
-@media (min-width: 901px) and (max-aspect-ratio: 3 / 2) {
-  .hero-artwork { background-position: 84% center; }
-}
-
 @media (max-width: 1000px) {
   .letters-exchange { grid-template-columns: 1fr; }
   .letters-intro { min-height: auto; padding: 95px 8vw 80px; }
@@ -949,7 +944,6 @@ footer.contact-footer { position: absolute; z-index: 2; left: 0; right: 0; botto
   .hero .primary-cta { min-width: 154px; min-height: 48px; color: var(--ink); background: #f5f0e7; }
   .hero .text-link { color: #f8f4ec; border-bottom-color: rgb(255 255 255 / 46%); }
   .hero-visual { min-height: calc(100dvh - 76px); }
-  .hero-artwork { background-position: 68% center; }
   .hero-shade { background: linear-gradient(90deg, rgb(24 34 49 / 15%), transparent 55%), linear-gradient(0deg, rgb(24 34 49 / 48%), transparent 52%); }
   .floating-caption { display: none; }
   .hero-seal { top: 26px; right: 22px; bottom: auto; width: 58px; height: 58px; }
@@ -981,7 +975,6 @@ footer.contact-footer { position: absolute; z-index: 2; left: 0; right: 0; botto
   .hero-copy { padding-inline: 22px; }
   .hero .script-word { font-size: clamp(44px, 12vw, 62px); }
   .hero .serif-word { font-size: clamp(34px, 9.5vw, 48px); }
-  .hero-artwork { background-position: 69% center; }
   .hero-seal { width: 56px; height: 56px; }
   .section-shell { width: calc(100% - 36px); }
   .section-heading h2, .journey-heading h2, .support-heading h2, .letter-section-heading h2 { font-size: 42px; }
@@ -1078,6 +1071,6 @@ footer.contact-footer { position: absolute; z-index: 2; left: 0; right: 0; botto
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
   .reading-progress { display: none; }
-  .hero-visual .hero-artwork { animation: none !important; transform: scaleX(-1); }
+  .hero-visual .hero-artwork { animation: none !important; transform: none; }
   .motion-ready [data-reveal] { opacity: 1; transform: none; }
 }

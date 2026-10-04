@@ -34,7 +34,8 @@ test("server-renders the Violet Evergarden tribute", async () => {
   assert.match(html, /<span class="script-word">薇尔莉特<\/span>/);
   assert.match(html, /<span class="serif-word">伊芙加登<\/span>/);
   assert.match(html, /写给世界的，第十四封信/);
-  assert.match(html, /href="\/violet-hero-clean\.webp"/);
+  assert.match(html, /href="\/violet-portrait\.webp"/);
+  assert.match(html, /class="hero-portrait-frame"/);
   assert.match(html, /人物档案/);
   assert.match(html, /应援手册/);
 });
