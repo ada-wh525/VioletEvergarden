@@ -7,7 +7,7 @@ import { createRenderer } from "../lib/home-drawing/renderer";
 import { pickSpots } from "../lib/home-drawing/spots";
 import { portraitBox } from "../lib/home-drawing/portrait";
 import { RELEASES } from "../lib/home-drawing/releases";
-import { INTRO_TIME, DRAWING_TIME, drawingTimeAt } from "../lib/home-drawing/playback";
+import { INTRO_TIME, DRAWING_TIME, PLAYBACK_DURATION, SCRUB_TIME, drawingTimeAt } from "../lib/home-drawing/playback";
 
 const SESSION_KEY = "violet-home-drawing-v3-viewed";
 const ARRIVAL_TIME = 2400;
@@ -78,6 +78,10 @@ export function HomeOpening() {
     let isArriving = false;
     let elapsed = 0;
     let playbackElapsed = 0;
+    let visiblePlayback = 0;
+    let settling = false;
+    let settleFrom = 0;
+    let settleElapsed = 0;
     let previous: number | null = null;
     let width = window.innerWidth;
     let height = window.innerHeight;
@@ -152,6 +156,9 @@ export function HomeOpening() {
     const togglePlayback = () => {
       if (isArriving || finished.current) return;
       pausedRef.current = !pausedRef.current;
+      settling = pausedRef.current;
+      settleFrom = visiblePlayback;
+      settleElapsed = 0;
       setPaused(pausedRef.current);
     };
     const scene = stage.current;
@@ -228,8 +235,20 @@ export function HomeOpening() {
       if (finished.current) return;
       const delta = previous === null ? 0 : timestamp - previous;
       previous = timestamp;
-      if (!pausedRef.current && !document.hidden) playbackElapsed += delta;
-      elapsed = drawingTimeAt(playbackElapsed);
+      if (!document.hidden) {
+        if (!pausedRef.current) playbackElapsed = Math.min(PLAYBACK_DURATION, playbackElapsed + delta);
+        // Like the original ScrollTrigger scrub: stop the target immediately,
+        // then let both the pen and camera settle to that target over 0.9 s.
+        if (pausedRef.current || playbackElapsed >= PLAYBACK_DURATION) {
+          if (!settling) { settling = true; settleFrom = visiblePlayback; settleElapsed = 0; }
+          settleElapsed += delta;
+          visiblePlayback = settleFrom + (playbackElapsed - settleFrom) * powerOut(settleElapsed / SCRUB_TIME);
+        } else {
+          settling = false;
+          visiblePlayback = playbackElapsed - (playbackElapsed - visiblePlayback) * Math.exp(-delta / (SCRUB_TIME / 5));
+        }
+      }
+      elapsed = drawingTimeAt(visiblePlayback);
       if (paint() < 1) animationFrame = window.requestAnimationFrame(draw);
       else arrive();
     };

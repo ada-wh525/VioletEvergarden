@@ -75,7 +75,7 @@ window.HTMLElement.prototype.animate = (keyframes, options) => {
 document.body.append(container, main);
 let root = createRoot(container);
 
-test("release reading time is longer while other drawing runs ten percent faster", () => {
+test("each release lasts four seconds while other drawing runs ten percent faster", () => {
   let wallTime = 0;
   for (const segment of PLAYBACK_SEGMENTS) {
     assert.ok(Math.abs(drawingTimeAt(wallTime) - segment.from) < 1e-7);
@@ -83,9 +83,9 @@ test("release reading time is longer while other drawing runs ten percent faster
     assert.ok(Math.abs(drawingTimeAt(midpoint) - (segment.from + segment.to) / 2) < 1e-7);
     wallTime += segment.duration;
   }
-  assert.equal(PLAYBACK_SEGMENTS.filter(s => s.speed === .75).length, 4);
-  assert.ok(PLAYBACK_SEGMENTS.filter(s => s.speed === .75).every(s => s.duration > 6000));
-  assert.ok(PLAYBACK_SEGMENTS.slice(1).filter(s => s.speed !== .75).every(s => s.speed === 1.1));
+  assert.equal(PLAYBACK_SEGMENTS.filter(s => s.reading).length, 4);
+  assert.ok(PLAYBACK_SEGMENTS.filter(s => s.reading).every(s => Math.abs(s.duration - 4000) < 1e-8));
+  assert.ok(PLAYBACK_SEGMENTS.slice(1).filter(s => !s.reading).every(s => s.speed === 1.1));
   assert.equal(drawingTimeAt(PLAYBACK_DURATION + 1000), 30150);
 });
 
@@ -199,7 +199,8 @@ test("release cards follow the drawing, pause preserves progress, and Escape rel
   root = createRoot(container);
   await act(async () => root.render(createElement(HomeOpening)));
   await tick(0);
-  await tick(6000);
+  // Real frame cadence leaves a visible scrub lag before pausing.
+  for (let time = 100; time <= 6000; time += 100) await tick(time);
   const releases = [...container.querySelectorAll(".home-opening__release")];
   assert.equal(releases.length, 4);
   assert.equal(releases[0].getAttribute("aria-hidden"), "false");
@@ -208,11 +209,17 @@ test("release cards follow the drawing, pause preserves progress, and Escape rel
   const before = JSON.stringify(contexts.get(container.querySelector(".home-opening__ink")).strokes);
   await act(async () => container.querySelector(".home-opening").click());
   assert.match(container.querySelector(".pointer-word").textContent, /已暂停/);
+  await tick(6300);
+  const easing = JSON.stringify(contexts.get(container.querySelector(".home-opening__ink")).strokes);
+  assert.notEqual(easing, before);
+  await tick(6900);
+  const stopped = JSON.stringify(contexts.get(container.querySelector(".home-opening__ink")).strokes);
+  assert.notEqual(stopped, easing);
   await tick(16000);
-  assert.equal(JSON.stringify(contexts.get(container.querySelector(".home-opening__ink")).strokes), before);
+  assert.equal(JSON.stringify(contexts.get(container.querySelector(".home-opening__ink")).strokes), stopped);
   await act(async () => container.querySelector(".home-opening").click());
   assert.match(container.querySelector(".pointer-word").textContent, /播放中/);
-  await tick(24000);
+  await tick(20500);
   assert.equal(releases[0].getAttribute("aria-hidden"), "true");
   assert.equal(releases[1].getAttribute("aria-hidden"), "false");
   const scene = container.querySelector(".home-opening");
