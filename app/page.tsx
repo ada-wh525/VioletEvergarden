@@ -3,6 +3,8 @@
 import { type CSSProperties, useEffect, useRef, useState } from "react";
 import { createLetterKeepsake } from "../lib/letter-keepsake";
 import { LetterDeliveryFlight, type LetterDeliveryState } from "../components/letter-delivery-flight";
+import { HomeOpening } from "../components/home-opening";
+import "./home-opening.css";
 
 const profile = [
   { label: "日文名", value: "ヴァイオレット・エヴァーガーデン" },
@@ -317,6 +319,8 @@ export default function Home() {
   };
 
   return (
+    <>
+    <HomeOpening />
     <main>
       <div className="top-sentinel" ref={topSentinelRef} aria-hidden="true" />
       <div className="reading-progress" aria-hidden="true" />
@@ -356,10 +360,23 @@ export default function Home() {
       </nav>
 
       <section className="hero" id="top">
-        <div className="hero-paper" aria-hidden="true" />
+        <div className="hero-visual" role="img" aria-label="薇尔莉特低头持信的侧身插画">
+          <div className="hero-artwork" aria-hidden="true">
+            <div className="hero-portrait-frame">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src="/violet-portrait.webp" alt="" width={1086} height={1448} fetchPriority="high" />
+            </div>
+          </div>
+          <div className="hero-shade" />
+          <div className="floating-caption">
+            <p>AUTO MEMORIES DOLL<br /><b>莱顿沙夫特里希 · C.H. 邮政公司</b></p>
+          </div>
+          <button className="wax-seal hero-seal" type="button" aria-label="撒下紫罗兰花瓣" onClick={() => setPetalBurst((value) => value + 1)}><span>V</span></button>
+        </div>
+
         <div className="hero-copy">
           <div className="eyebrow"><span>致 未曾谋面的你</span><i /></div>
-          <h1 lang="zh-CN">
+          <h1 lang="zh-CN" tabIndex={-1}>
             <span className="script-word">薇尔莉特</span>
             <span className="serif-word">伊芙加登</span>
           </h1>
@@ -371,14 +388,6 @@ export default function Home() {
             <a className="primary-cta" href="#story"><LetterIcon />开启这封信</a>
             <a className="text-link" href="#profile">认识薇尔莉特 <span>↗</span></a>
           </div>
-        </div>
-
-        <div className="hero-visual" role="img" aria-label="薇尔莉特原创角色插画">
-          <div className="hero-shade" />
-          <div className="floating-caption">
-            <p>AUTO MEMORIES DOLL<br /><b>莱顿沙夫特里希 · C.H. 邮政公司</b></p>
-          </div>
-          <button className="wax-seal hero-seal" type="button" aria-label="撒下紫罗兰花瓣" onClick={() => setPetalBurst((value) => value + 1)}><span>V</span></button>
         </div>
       </section>
 
@@ -671,5 +680,6 @@ export default function Home() {
       <div className={`toast ${toast ? "is-visible" : ""}`} role="status" aria-live="polite">{toast}</div>
       <a className={`back-top ${scrolled ? "is-visible" : ""}`} href="#top" aria-label="返回页面顶部">↑</a>
     </main>
+    </>
   );
 }
