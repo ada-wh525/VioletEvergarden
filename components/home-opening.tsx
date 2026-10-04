@@ -32,6 +32,7 @@ export function HomeOpening() {
   const releasePage = useRef<(() => void) | null>(null);
   const skipButton = useRef<HTMLButtonElement>(null);
   const stage = useRef<HTMLDivElement>(null);
+  const pointer = useRef<HTMLDivElement>(null);
   const paper = useRef<HTMLDivElement>(null);
   const title = useRef<HTMLParagraphElement>(null);
   const art = useRef<HTMLDivElement>(null);
@@ -70,7 +71,7 @@ export function HomeOpening() {
     const previousOverflow = document.body.style.overflow;
     page?.setAttribute("inert", "");
     document.body.style.overflow = "hidden";
-    skipButton.current?.focus();
+    stage.current?.focus();
 
     let animationFrame = 0;
     let arrival: Animation | null = null;
@@ -99,6 +100,7 @@ export function HomeOpening() {
     let retraceStarted = 0;
     const gemTime = timeAt(stroke.gem.doneAt);
     const paint = () => {
+      stage.current?.setAttribute("data-at-start", elapsed < 4000 ? "true" : "false");
       const t = clamp((elapsed - INTRO_TIME) / DRAWING_TIME);
       const u = penTime(t) * powerInOut((elapsed - 150) / 2000);
       const nextRetrace = isRetrace(u) ? 1 : 0;
@@ -147,18 +149,43 @@ export function HomeOpening() {
       width = window.innerWidth; height = window.innerHeight;
       camera = layout(); paint();
     };
+    const togglePlayback = () => {
+      if (isArriving || finished.current) return;
+      pausedRef.current = !pausedRef.current;
+      setPaused(pausedRef.current);
+    };
+    const scene = stage.current;
+    const onClick = (event: MouseEvent) => {
+      if ((event.target as Element).closest("button, a")) return;
+      scene?.focus({ preventScroll: true });
+      togglePlayback();
+    };
+    // Port of Pointer.svelte: trailing pointer, edge flip and touch resting hint.
+    const onPointerMove = (event: PointerEvent) => {
+      if (!pointer.current || event.pointerType !== "mouse") return;
+      pointer.current.style.transform = `translate(${event.clientX}px, ${event.clientY}px)`;
+      pointer.current.classList.toggle("is-flipped", event.clientX > window.innerWidth - 180);
+      pointer.current.classList.toggle("is-hidden", !!(event.target as Element).closest("button, a"));
+    };
+    const onPointerLeave = () => pointer.current?.classList.add("is-hidden");
     const onKeyDown = (event: KeyboardEvent) => {
+      if ((event.key === " " || event.key === "Enter") && event.target === scene) {
+        event.preventDefault(); togglePlayback();
+      }
       if (event.key === "Escape") finish(true);
       if (event.key === "Tab" && !event.altKey && !event.ctrlKey && !event.metaKey) {
-        const buttons = stage.current?.querySelectorAll<HTMLButtonElement>("button:not([disabled])");
+        const buttons = stage.current?.querySelectorAll<HTMLElement>("button:not([disabled])");
         if (!buttons?.length) return;
-        const first = buttons[0], last = buttons[buttons.length - 1];
+        const first = scene!, last = buttons[buttons.length - 1];
         if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
         else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
       }
     };
     const onMotionChange = () => { if (reducedMotion.matches) finish(); };
     const onVisibilityChange = () => { previous = null; };
+    scene?.addEventListener("click", onClick);
+    scene?.addEventListener("pointermove", onPointerMove, { passive: true });
+    scene?.addEventListener("pointerleave", onPointerLeave);
     document.addEventListener("keydown", onKeyDown);
     document.addEventListener("visibilitychange", onVisibilityChange);
     window.addEventListener("resize", resize);
@@ -167,6 +194,9 @@ export function HomeOpening() {
       window.cancelAnimationFrame(animationFrame);
       arrival?.cancel();
       window.clearTimeout(arrivalTimeout);
+      scene?.removeEventListener("click", onClick);
+      scene?.removeEventListener("pointermove", onPointerMove);
+      scene?.removeEventListener("pointerleave", onPointerLeave);
       document.removeEventListener("keydown", onKeyDown);
       document.removeEventListener("visibilitychange", onVisibilityChange);
       window.removeEventListener("resize", resize);
@@ -209,7 +239,7 @@ export function HomeOpening() {
 
   if (!visible) return null;
   return (
-    <div ref={stage} className={`home-opening${arriving ? " is-arriving" : ""}`} style={{ "--opening-arrival-duration": `${ARRIVAL_TIME}ms` } as CSSProperties} role="dialog" aria-modal="true" aria-label="人物绘画入场" onAnimationEnd={(event) => {
+    <div ref={stage} className={`home-opening${arriving ? " is-arriving" : ""}${paused ? " is-paused" : ""}`} style={{ "--opening-arrival-duration": `${ARRIVAL_TIME}ms` } as CSSProperties} role="dialog" aria-modal="true" aria-label="人物绘画入场" aria-describedby="opening-playback-help" tabIndex={-1} onAnimationEnd={(event) => {
       if (event.target === event.currentTarget && event.animationName === "home-opening-exit") finish();
     }}>
       <div className="home-opening__backdrop" aria-hidden="true"><div ref={paper} className="home-opening__paper" /></div>
@@ -227,8 +257,12 @@ export function HomeOpening() {
           <div><p className="home-opening__kind">{release.kind}</p><h2>{release.title}</h2><p className="home-opening__date"><time dateTime={release.date}>{release.date.replaceAll("-", ".")}</time><span>{release.label}</span></p><p className="home-opening__detail">{release.detail}</p></div>
         </article>
       ))}
+      <p id="opening-playback-help" className="sr-only">点击画面或按空格、回车键暂停，再次操作继续。按 Escape 跳过。</p>
+      <div ref={pointer} className="home-opening__pointer" aria-hidden="true">
+        <svg viewBox="-10 -28 20 56"><line className="pointer-rule" x1="0" y1="-20" x2="0" y2="20" /><line className="pointer-drop" x1="0" y1="-20" x2="0" y2="-2" /></svg>
+        <div className="pointer-side"><p key={paused ? "paused" : "playing"} className="pointer-word"><b>{paused ? "已暂停" : "播放中"}</b><small><span className="pointer-click">点击</span><span className="pointer-tap">轻触</span>{paused ? "继续" : "暂停"}</small></p></div>
+      </div>
       <div className="home-opening__controls">
-        <button className="home-opening__pause" type="button" disabled={arriving} aria-pressed={paused} onClick={() => { pausedRef.current = !pausedRef.current; setPaused(pausedRef.current); }}>{paused ? "继续" : "暂停"}</button>
         <button ref={skipButton} className="home-opening__skip" type="button" onClick={() => finish(true)}>跳过 <span aria-hidden="true">↗</span></button>
       </div>
     </div>
