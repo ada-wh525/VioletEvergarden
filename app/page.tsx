@@ -1,6 +1,7 @@
 "use client";
 
 import { type CSSProperties, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { createLetterKeepsake } from "../lib/letter-keepsake";
 import { LetterDeliveryFlight, type LetterDeliveryState } from "../components/letter-delivery-flight";
 import { HomeOpening } from "../components/home-opening";
@@ -346,6 +347,7 @@ export default function Home() {
           <a className={activeSection === "support" ? "active" : ""} aria-current={activeSection === "support" ? "location" : undefined} href="#support" onClick={() => setMenuOpen(false)}>应援手册</a>
           <a href="/letters" onClick={() => setMenuOpen(false)}>陌生来信</a>
           <a href="/typewriter" onClick={() => setMenuOpen(false)}>人偶打字室</a>
+          <Link href="/read" onClick={() => setMenuOpen(false)}>原著书信</Link>
         </div>
         <button
           className="sound-toggle"
@@ -633,6 +635,7 @@ export default function Home() {
         <div className="footer-links">
           <a href="/typewriter">练习成为人偶 · 打字室 ↗</a>
           <a href="/letters">随机收信与投递 ↗</a>
+          <Link href="/read">原著书信 · 信匣 ↗</Link>
           <a href="https://tv.violet-evergarden.jp/" target="_blank" rel="noreferrer">TV 动画官方网站 ↗</a>
           <a href="https://violet-evergarden.jp/" target="_blank" rel="noreferrer">剧场版官方网站 ↗</a>
           <a href="#top">回到信首 ↑</a>

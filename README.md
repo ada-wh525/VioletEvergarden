@@ -109,3 +109,18 @@ npm test
 绘画结束后，用 2.4 秒移入左侧首页人物。`public/violet-portrait.webp` 按原始线稿构图上色，朝向、画幅和主要人物轮廓对应；Canvas 与彩色图片使用相同的变换，并以首页图片实际 `object-fit: contain` 区域为落点。手机布局也按实际区域计算，不另加翻转或裁切。减少动态效果、锚点访问、Canvas 不可用和禁用 JavaScript 时直接显示首页。
 
 作品资料与素材来源见 [docs/opening-assets.md](docs/opening-assets.md)。
+
+## 原著书信阅读器（测试功能）
+
+入口：`/read`，首页导航与页脚均有链接。四卷原著各自是一封信：`/read` 是信匣，`/read/[volume]` 拆开那一卷并显示目录，`/read/[volume]/[chapter]` 是阅读页。
+
+- 卷与章节数据放在 `lib/novel/content/volume-*.ts`，字段见 `lib/novel/types.ts`。`text` 留空的章节会显示"这封信还封着"的封缄态，不会出现占位正文。
+- 正文用空行分段；`:::letter` 与 `:::` 之间是信中信，块内首行以 `> ` 开头为称呼、末行以 `-- ` 开头为署名；单独一行 `* * *` 渲染为分节符。
+- 卷 I 的 `sample` 章节（`sample: true`）是排版样张，文本取自站主提供的练习信；放入正式译文后请删除。样张不参与章节编号。
+- 放入译文前请确认译者授权，并把译者写进各卷的 `provenance`。阅读页页脚与卷页都标注"非官方同人译本"。
+- 阅读进度按段落记忆在浏览器 `localStorage`（`violet-read-progress:*`），排字设置（字号、行距、象牙白／夜灯／普鲁士蓝三种信纸）记忆在 `violet-read-settings`，不经过服务端。
+- 阅读页交互：顶部"邮路"进度、章节页眉邮戳、选中文字后"抄录这一句"复制带出处的引文、键盘 ← → 翻章、减少动态效果时关闭所有入场动画。
+
+```bash
+node --test tests/novel-reader.test.mjs
+```
